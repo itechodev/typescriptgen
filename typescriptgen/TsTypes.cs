@@ -67,5 +67,5 @@ public class TsType
 public class TsProperty
 {
     public string Name { get; set; } = string.Empty;
-    public TsType Type { get; set; }
+    public TsType Type { get; set; } = new();
 }
