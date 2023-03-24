@@ -133,8 +133,8 @@ namespace TypescriptGen
             }
 
             // now generate all the interfaces
-            GenerateInterfaces(converter.Interfaces);
-            GenerateEnums(converter.Enums);
+            GenerateInterfaces(args[1], converter.Interfaces);
+            GenerateEnums(args[1], converter.Enums);
 
             Console.WriteLine($"{converter.Interfaces.Count} interfaces and {converter.Enums.Count} enums generated.");
         }
@@ -171,7 +171,7 @@ namespace TypescriptGen
             }
         }
 
-        private static void GenerateEnums(List<TsEnum> enums)
+        private static void GenerateEnums(string path, List<TsEnum> enums)
         {
             foreach (var @enum in enums)
             {
@@ -190,11 +190,11 @@ namespace TypescriptGen
                 code.WriteLine("}");
                 code.WriteLine(null);
                 code.WriteLine($"export default {@enum.Name};");
-                code.Flush(@enum.Name + ".ts");
+                code.Flush(Path.Combine(path, @enum.Name + ".ts"));
             }
         }
 
-        private static void GenerateInterfaces(List<TsInterface> interfaces)
+        private static void GenerateInterfaces(string path, List<TsInterface> interfaces)
         {
             foreach (var @interface in interfaces)
             {
@@ -237,7 +237,7 @@ namespace TypescriptGen
                 code.Outdent();
                 code.WriteLine("}");
 
-                code.Flush(@interface.Name + ".ts");
+                code.Flush( Path.Combine(path, @interface.Name + ".ts"));
             }
         }
 
@@ -326,7 +326,7 @@ namespace TypescriptGen
             }
 
             // fallback to the default route controller/action
-            return "/" + FormatControllerName(controller.Name) + "/" + action.Name;
+            return "/api/" + FormatControllerName(controller.Name) + "/" + action.Name;
         }
 
 
@@ -336,6 +336,12 @@ namespace TypescriptGen
             if (!q.Any())
                 return null;
 
+            // Check is params in [FromBody] is a Object, but not an array
+            if (q.Count == 1 && Type.GetTypeCode(q[0].Type) == TypeCode.Object && !q[0].Type.IsArray())
+            {
+                return q[0].Name;
+            }
+            
             return "{" + string.Join(", ", q.Select(a => a.Name)) + "}";
         }
 
