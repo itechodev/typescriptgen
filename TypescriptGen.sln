@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "typescriptsourcegen", "type
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webapi", "webapi\webapi.csproj", "{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypescriptGen", "TypescriptGen\TypescriptGen.csproj", "{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
