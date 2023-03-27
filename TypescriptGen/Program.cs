@@ -181,10 +181,7 @@ namespace TypescriptGen
                 code.WriteLine($"enum {@enum.Name}" + " {");
                 code.Indent();
 
-                code.WriteLines(
-                    @enum.Options.Select(e => @enum.Key == NumberStringKey.Number
-                        ? $"{e.Key} = {e.Value}"
-                        : $"{e.Key} = \"{e.Value}\""), ",");
+                code.WriteLines(@enum.Options.Select(e => $"{e.Key} = \"{e.Value}\""), ",");
 
                 code.Outdent();
                 code.WriteLine("}");
