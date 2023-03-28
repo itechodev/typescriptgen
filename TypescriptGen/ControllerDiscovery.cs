@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TypescriptGen;
 
+public class IgnoreTypeGenAttribute : Attribute
+{
+}
 public static class ControllerDiscovery
 {
     public class ControllerInfo
@@ -48,6 +51,11 @@ public static class ControllerDiscovery
         public ActionParameterKind Kind { get; set; }
         public object? DefaultValue { get; set; }
         public Type? Type { get; set; }
+    }
+    
+    public static bool CheckIfControllerHasIgnoreAttribute(Type controller)
+    {
+        return controller.GetCustomAttributes().Any(a => a.GetType().Name == nameof(IgnoreTypeGenAttribute));
     }
 
     public static ControllerInfo PopulateController(Type controller)

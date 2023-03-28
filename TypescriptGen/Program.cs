@@ -34,6 +34,7 @@ namespace TypescriptGen
             var controllers = asm
                 .GetTypes()
                 .Where(t => typeof(Controller).IsAssignableFrom(t) || typeof(ControllerBase).IsAssignableFrom(t))
+                .Where(t => !ControllerDiscovery.CheckIfControllerHasIgnoreAttribute(t))
                 .Select(ControllerDiscovery.PopulateController)
                 .ToList();
             
