@@ -228,9 +228,14 @@ namespace TypescriptGen
                 }
 
                 code.Indent();
-                code.WriteLines(
-                    @interface.Members.Select(mem =>
-                        $"{TsGenerator.CamelCase(mem.Name)}: {TsGenerator.ToDefString(mem.TsType)}" + (mem.Nullable ? " | null" : "")), ",");
+                
+                // remove duplicate members
+                var uniqueMembers = new HashSet<string>();
+                foreach (var generatedString in @interface.Members.Select(mem => $"{TsGenerator.CamelCase(mem.Name)}: {TsGenerator.ToDefString(mem.TsType)}" + (mem.Nullable ? " | null" : "")))
+                {
+                    uniqueMembers.Add(generatedString);
+                }
+                code.WriteLines(uniqueMembers, ",");
 
                 code.Outdent();
                 code.WriteLine("}");
