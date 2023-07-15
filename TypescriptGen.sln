@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypescriptGen", "Typescript
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inspector", "Inspector\Inspector.csproj", "{8A35A137-12E0-460A-9A51-C5DBCB2BA8F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itecho.TsGen", "Itecho.TsGen\Itecho.TsGen.csproj", "{B482BAB0-F31E-457B-8069-D1ED7A1AA312}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{8A35A137-12E0-460A-9A51-C5DBCB2BA8F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A35A137-12E0-460A-9A51-C5DBCB2BA8F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A35A137-12E0-460A-9A51-C5DBCB2BA8F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B482BAB0-F31E-457B-8069-D1ED7A1AA312}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B482BAB0-F31E-457B-8069-D1ED7A1AA312}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B482BAB0-F31E-457B-8069-D1ED7A1AA312}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B482BAB0-F31E-457B-8069-D1ED7A1AA312}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
