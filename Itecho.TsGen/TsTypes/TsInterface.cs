@@ -3,7 +3,10 @@ using System.Reflection;
 namespace Itecho.TsGen.TsTypes;
 
 /// <summary>
-/// represents an TS interface
+/// Represents an TS interface.
+/// Typically converted from C# class and interfaces
+/// Includes optional generics and inheritance
+/// For a type that references a type with specific generic parameters, see TsGenericReference
 /// </summary>
 public class TsInterface : TsType
 {
