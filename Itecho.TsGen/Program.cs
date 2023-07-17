@@ -22,12 +22,15 @@ public static class Program
         }
 
         var assemblyPath = args[0];
-        Console.WriteLine("Getting assembly: " + assemblyPath);
+        Console.WriteLine("Inspecting assembly: " + assemblyPath);
+
         // Loading assembly dependencies from a complete output path
         // using a custom AssemblyLoadContext and AssemblyDependencyResolver
         var loadContext = new DependencyLoadContext(assemblyPath);
         var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
 
-        Console.WriteLine(string.Join("\n", assembly.GetExportedTypes().Select(t => t.Name)));
+        var controllers = ControllerInspector.Inspect(assembly);
+
+        Console.WriteLine(string.Join("\n", controllers.Select(t => t.Name)));
     }
 }
