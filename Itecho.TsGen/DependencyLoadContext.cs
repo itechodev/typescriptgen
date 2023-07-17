@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace Inspector;
+namespace Itecho.TsGen;
 
 internal class DependencyLoadContext : AssemblyLoadContext
 {
