@@ -9,5 +9,11 @@ public class TsEnum : TsType
         Number
     }
     public TsEnumValueType ValueType { get; set; }
-    public Dictionary<string, int> Values { get; set; } = new();
+    public Dictionary<string, int> Values { get; set; }
+
+    public TsEnum(TsEnumValueType valueType, Dictionary<string, int> values)
+    {
+        ValueType = valueType;
+        Values = values;
+    }
 }
