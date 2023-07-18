@@ -5,4 +5,7 @@ namespace Itecho.TsGen.TsTypes;
 /// </summary>
 public class TsUnion : TsCompositeType
 {
+    public TsUnion(params TsType[] types) : base(types)
+    {
+    }
 }

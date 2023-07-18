@@ -1,5 +1,7 @@
+using System.Reflection;
 using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Itecho.TsGen;
 
@@ -13,8 +15,19 @@ public static class TsConverter
         return tsType;
     }
 
-    public static TsType Convert(Type type)
+    // nullable flag is used to indicate nullability of the type
+    // is being dig out in the class definition and the type alone cannot be used alone
+    // using a combination of the property type, declaring type and runtime generated attributes
+    public static TsType Convert(Type type, bool nullable = false)
     {
+        // check if we can reduce the type to a lower level
+        // e.g.ActionResult<T> is the same as T.
+        // we don't need to convert ActionResult or Task
+        if (type == typeof(ActionResult<>) || type == typeof(Task<>))
+        {
+            type = type.GenericTypeArguments[0];
+        }
+
         if (Cache.TryGetValue(type, out var convert))
             return convert;
 
@@ -25,6 +38,18 @@ public static class TsConverter
             return AddCache(type, ConvertEnum(type));
         }
 
+        var ret = ConvertType(type);
+        // handle nullability
+        if (nullable || type.IsNullable())
+        {
+            return new TsUnion(ret, new TsPrimitive(TsPrimitive.TsPrimitiveType.Null));
+        }
+
+        return ret;
+    }
+
+    private static TsType ConvertType(Type type)
+    {
         switch (Type.GetTypeCode(type))
         {
             case TypeCode.Object:
@@ -102,17 +127,6 @@ public static class TsConverter
             return ConvertClass(type);
         }
 
-        // Convert ActionResult<T> to T 
-        // if (type.IsGenericType)
-        // {
-        //     return ConvertGenericType(type, nullable);
-        // }
-
-        // ContainsGenericParameters after array.
-        // typeof(T[]).ContainsGenericParameters == true
-        // if (type.ContainsGenericParameters)
-        //     return new TsGenericType(type.Name);
-
         return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
     }
 
@@ -131,39 +145,60 @@ public static class TsConverter
 
     private static TsType ConvertClass(Type type)
     {
-        // var generics = type.IsGenericType
-        //     ? type.GetGenericArguments()
-        //         .Select(g => new TsGenericUsage(g.Name, null)).ToList()
-        //     : new List<TsGenericUsage>();
+        var extends = type.BaseType != null && type.BaseType != typeof(object) ? Convert(type.BaseType) : null;
 
+        var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
+            .Select(p =>
+            {
+                var json = p.GetCustomAttribute<JsonPropertyAttribute>();
+                var propName = json?.PropertyName ?? p.Name;
+                var nullable = type.IsNullable() || NullableHelper.IsNullable(p);
+                return new TsInterface.TsInterfaceMember(propName, Convert(p.PropertyType, nullable));
+            });
 
-        if (type.BaseType != null)
+        var ret = new TsInterface(FormatName(type.Name), members.ToArray(), extends as TsInterface);
+
+        // Convert ActionResult<T> to T 
+        if (type.IsGenericType)
         {
-            var inherited = Convert(type.BaseType);
+            var args = type
+                .GetGenericArguments()
+                .Select(g => new TsGenericReference.TsGenericReferenceType(g.Name, null))
+                .ToArray();
+
+            // nested type˝
+
+            // new TsGenericReference()
+            // convert the generic type definition to the list
+            // return ConvertGenericType(type, nullable);
         }
 
-        return new TsInterface(FormatName(type.Name), Array.Empty<TsInterface.TsInterfaceMember>());
-        // {
-        //     // Name = ,
-        //     Generics = generics,
-        //     Inherit = inherited as TsInterface,
-        //     Nullable = false
-        // };
-        //
-        // Interfaces.Add(ret);
-        //
-        // ret.Members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
-        //     .Select(p =>
+        var genericTypedef = type.GetGenericTypeDefinition();
+        return ret;
+
+        //     if (genericTypedef == typeof(Nullable<>))
         //     {
-        //         var propertyNullable = p.PropertyType.IsNullable() || NullableHelper.IsNullable(p);
-        //         var json = p.GetCustomAttribute<JsonPropertyAttribute>();
-        //         var propName = json?.PropertyName ?? p.Name;
-        //         return new TsInterfaceMember(propName, ConvertType(p.PropertyType, propertyNullable), propertyNullable,
-        //             false);
-        //     })
-        //     .ToList();
+        //         return ConvertType(type.GenericTypeArguments[0], true);
+        //     }
+        //     
+        //     if (genericTypedef == )
+        //     {
+        //         return ConvertType(type.GenericTypeArguments[0]);
+        //     }
         //
-        // return ret;
+        //     // BaseClass<GenericSubstitute>
+        //     // 3 types to add: BaseClass, GenericSubstitute and TsGenericReference: BaseClass<GenericSubstitute> 
+        //
+        //     // Firs the base class, BaseClass<T,..> {}
+        //     var geneticType = ConvertTsInterface(genericTypedef, nullable);
+        //
+        //     // and then for each for the genetic arguments
+        //     var genericArguments = type.GenericTypeArguments
+        //         .Select(t => ConvertType(t))
+        //         .ToList();
+        //
+        //     // return the reference to this generic class
+        //     return new TsGenericReference(geneticType, genericArguments);
     }
 
     private static TsType ConvertDictionary(Type type)

@@ -25,9 +25,12 @@ public class TsInterface : TsType
     public string Name { get; }
     public TsInterfaceMember[] Members { get; }
 
-    public TsInterface(string name, TsInterfaceMember[] members)
+    public TsInterface? Extends { get; }
+
+    public TsInterface(string name, TsInterfaceMember[] members, TsInterface? extends)
     {
         Name = name;
         Members = members;
+        Extends = extends;
     }
 }

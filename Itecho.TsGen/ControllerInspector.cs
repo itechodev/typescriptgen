@@ -1,4 +1,5 @@
 using System.Reflection;
+using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Itecho.TsGen;
@@ -22,7 +23,7 @@ public enum ActionKind
 public class ActionInfo
 {
     public string RouteTemplate { get; set; } = string.Empty;
-    public Type? ReturnType { get; set; }
+    public TsType ReturnType { get; set; }
     public ActionKind Kind { get; set; }
     public string Name { get; set; } = string.Empty;
     public List<ActionParameter> Parameters { get; set; } = new();
@@ -39,10 +40,18 @@ public enum ActionParameterKind
 
 public class ActionParameter
 {
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; }
     public ActionParameterKind Kind { get; set; }
     public object? DefaultValue { get; set; }
-    public Type? Type { get; set; }
+    public TsType Type { get; set; }
+
+    public ActionParameter(string name, ActionParameterKind kind, object? defaultValue, TsType type)
+    {
+        Name = name;
+        Kind = kind;
+        DefaultValue = defaultValue;
+        Type = type;
+    }
 }
 
 public static class ControllerInspector
@@ -88,13 +97,8 @@ public static class ControllerInspector
         if (param.GetCustomAttribute<FromServicesAttribute>() != null)
             return null;
 
-        return new ActionParameter()
-        {
-            Name = param.Name ?? "",
-            DefaultValue = param.DefaultValue,
-            Kind = GetKind(param),
-            Type = param.ParameterType
-        };
+        return new ActionParameter(param.Name ?? "", GetKind(param), param.DefaultValue,
+            TsConverter.Convert(param.ParameterType));
     }
 
 
@@ -106,7 +110,7 @@ public static class ControllerInspector
         {
             Name = methodInfo.Name,
             RouteTemplate = route?.Template ?? "",
-            ReturnType = methodInfo.ReturnType,
+            ReturnType = TsConverter.Convert(methodInfo.ReturnType),
             Kind = PopulateMethodKind(methodInfo),
             Parameters = methodInfo
                 .GetParameters()
