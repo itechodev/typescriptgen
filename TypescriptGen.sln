@@ -1,9 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "typescriptsourcegen", "typescriptsourcegen\typescriptsourcegen.csproj", "{F6C49717-414B-4C35-9E8C-6B177C1359AB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webapi", "webapi\webapi.csproj", "{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypescriptGen", "TypescriptGen\TypescriptGen.csproj", "{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itecho.TsGen", "Itecho.TsGen\Itecho.TsGen.csproj", "{B482BAB0-F31E-457B-8069-D1ED7A1AA312}"
@@ -14,14 +10,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F6C49717-414B-4C35-9E8C-6B177C1359AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F6C49717-414B-4C35-9E8C-6B177C1359AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F6C49717-414B-4C35-9E8C-6B177C1359AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F6C49717-414B-4C35-9E8C-6B177C1359AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD2172BD-4286-469D-8B6B-7AF0A7D1D40A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D7F41C2-2670-4CFA-8606-7FC2295C9A5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
