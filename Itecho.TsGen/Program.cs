@@ -52,8 +52,7 @@ public static class Program
         var controllers = ControllerInspector.Inspect(assembly);
 
         var interfaces = TsConverter.Cache.Values
-            .Where(t => t.Type is TsInterface)
-            .Select(t => t.Type as TsInterface)
+            .OfType<TsInterface>()
             .ToList();
 
 

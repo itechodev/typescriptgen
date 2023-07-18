@@ -22,10 +22,26 @@ public class TsInterface : TsType
         }
     }
 
-    public string Name { get; }
-    public TsInterfaceMember[] Members { get; }
-    public TsInterface? Extends { get; }
-    public TsGeneric[] Generics { get; }
+    public string Name { get; private set; }
+    public TsInterfaceMember[] Members { get; private set; }
+    public TsInterface? Extends { get; private set; }
+    public TsGeneric[] Generics { get; private set; }
+
+    public TsInterface()
+    {
+        Name = string.Empty;
+        Members = Array.Empty<TsInterfaceMember>();
+        Extends = null;
+        Generics = Array.Empty<TsGeneric>();
+    }
+
+    public void CopyFrom(TsInterface other)
+    {
+        Name = other.Name;
+        Members = other.Members;
+        Extends = other.Extends;
+        Generics = other.Generics;
+    }
 
     public TsInterface(string name, TsInterfaceMember[] members, TsInterface? extends, TsGeneric[] generics)
     {
