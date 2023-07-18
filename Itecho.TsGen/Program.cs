@@ -5,10 +5,32 @@ namespace Itecho.TsGen;
 // dotnet pack
 // dotnet tool install --global --add-source ./nupkg inspector  
 
+public class PaginationResponse<T>
+{
+    public T[] Data { get; set; }
+    public int Total { get; set; }
+}
+
+public class Dog
+{
+    public string Name { get; set; }
+    public string Breed { get; set; }
+}
+
+public class SomeResponse
+{
+    public bool Error { get; set; }
+    public PaginationResponse<Dog> Dogs { get; set; }
+}
+
 public static class Program
 {
     static void Main(string[] args)
     {
+        var tsType = TsConverter.Convert(typeof(SomeResponse));
+
+        return;
+
         if (args.Length == 0)
         {
             var versionString = Assembly.GetEntryAssembly()?

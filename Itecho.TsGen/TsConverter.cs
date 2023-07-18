@@ -34,13 +34,6 @@ public static class TsConverter
     {
         return AddCache(type, () =>
         {
-            // GetTypeCode of enum is the underlying value like int32 or string
-            // have to check before the GetTypeCode switch
-            if (type.IsEnum)
-            {
-                return ConvertEnum(type);
-            }
-
             var ret = ConvertType(type);
             // handle nullability
             if (nullable || type.IsNullable())
@@ -54,6 +47,18 @@ public static class TsConverter
 
     private static TsType ConvertType(Type type)
     {
+        if (type.IsGenericParameter)
+        {
+            return new TsGeneric(type.Name);
+        }
+
+        // GetTypeCode of enum is the underlying value like int32 or string
+        // have to check before the GetTypeCode switch
+        if (type.IsEnum)
+        {
+            return ConvertEnum(type);
+        }
+
         switch (Type.GetTypeCode(type))
         {
             case TypeCode.Object:
@@ -104,14 +109,6 @@ public static class TsConverter
         if (type == typeof(object) || type == typeof(ActionResult))
             return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
-        // check if we can reduce the type to a lower level
-        // e.g.ActionResult<T> is the same as T.
-        // we don't need to convert ActionResult or Task
-        if (type == typeof(ActionResult<>) || type == typeof(Task<>))
-        {
-            type = type.GenericTypeArguments[0];
-        }
-
         // convert IFormFile to File in TS, which is build in
         if (type == typeof(IFormFile))
         {
@@ -134,6 +131,23 @@ public static class TsConverter
             return new TsArray(Convert(type.GetGenericArguments()[0]));
         }
 
+        if (type.IsGenericType)
+        {
+            // check if we can reduce the type to a lower level
+            // e.g.ActionResult<T> is the same as T.
+            // we don't need to convert ActionResult or Task
+            var genericTypeDef = type.GetGenericTypeDefinition();
+            if (genericTypeDef == typeof(ActionResult<>))
+            {
+                if (type.GenericTypeArguments.Length == 0)
+                    return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
+
+                type = type.GenericTypeArguments[0];
+            }
+
+            return ConvertGeneric(type);
+        }
+
         if (type.IsClass)
         {
             return ConvertClass(type);
@@ -154,6 +168,22 @@ public static class TsConverter
         return index == -1 ? typeName : typeName[..index];
     }
 
+    private static TsType ConvertGeneric(Type type)
+    {
+        // if type is a generic ie: PaginationResponse<Dog>
+        // then we need to convert PaginationResponse<T> and Dog
+        // and return the reference to PaginationResponse with filled generic Dog.
+        // type.GetGenericArguments() == [Dog]
+        var genericsArgs = type
+            .GetGenericArguments()
+            .Select(p => p.IsGenericParameter ? new TsGeneric(p.Name) : ConvertType(p))
+            .ToArray();
+
+        // type.GetGenericTypeDefinition() == PaginationResponse`1
+        // type.GetGenericTypeDefinition().GetGenericArguments() == [T]
+        var defType = Convert(type.GetGenericTypeDefinition()) as TsInterface;
+        return new TsGenericReference(defType!, genericsArgs);
+    }
 
     private static TsType ConvertClass(Type type)
     {
@@ -168,23 +198,15 @@ public static class TsConverter
                 var propName = json?.PropertyName ?? p.Name;
                 var nullable = type.IsNullable() || NullableHelper.IsNullable(p);
                 return new TsInterface.TsInterfaceMember(propName, Convert(p.PropertyType, nullable));
-            });
+            })
+            .ToArray();
 
-        var ret = new TsInterface(FormatName(type.Name), members.ToArray(), extends as TsInterface);
+        var generics = type
+            .GetGenericArguments()
+            .Select(g => new TsGeneric(g.Name))
+            .ToArray();
 
-        // Convert ActionResult<T> to T 
-        if (type.IsGenericType)
-        {
-            var args = type
-                .GetGenericArguments()
-                .Select(g => new TsGenericReference.TsGenericReferenceType(g.Name, null))
-                .ToArray();
-
-            var genericInterface = Convert(type.GetGenericTypeDefinition()) as TsInterface;
-            return new TsGenericReference(genericInterface!, args);
-        }
-
-        return ret;
+        return new TsInterface(FormatName(type.Name), members, extends as TsInterface, generics);
     }
 
     private static TsType ConvertDictionary(Type type)

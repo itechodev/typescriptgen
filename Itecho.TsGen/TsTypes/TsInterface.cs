@@ -24,13 +24,14 @@ public class TsInterface : TsType
 
     public string Name { get; }
     public TsInterfaceMember[] Members { get; }
-
     public TsInterface? Extends { get; }
+    public TsGeneric[] Generics { get; }
 
-    public TsInterface(string name, TsInterfaceMember[] members, TsInterface? extends)
+    public TsInterface(string name, TsInterfaceMember[] members, TsInterface? extends, TsGeneric[] generics)
     {
         Name = name;
         Members = members;
         Extends = extends;
+        Generics = generics;
     }
 }
