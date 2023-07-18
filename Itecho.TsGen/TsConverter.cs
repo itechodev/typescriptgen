@@ -129,22 +129,8 @@ public static class TsConverter
             return SetCache(type, new TsArray(Convert(type.GetGenericArguments()[0])));
         }
 
-        if (type.IsGenericType)
-        {
-            // check if we can reduce the type to a lower level
-            // e.g.ActionResult<T> is the same as T.
-            // we don't need to convert ActionResult or Task
-            var genericTypeDef = type.GetGenericTypeDefinition();
-            if (genericTypeDef == typeof(ActionResult<>))
-            {
-                if (type.GenericTypeArguments.Length == 0)
-                    return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
-                type = type.GenericTypeArguments[0];
-            }
-        }
-
-        if (type.IsGenericType)
+        if (type.IsGenericType && type != type.GetGenericTypeDefinition())
         {
             return ConvertGeneric(type);
         }
@@ -171,13 +157,28 @@ public static class TsConverter
 
     private static TsType ConvertGeneric(Type type)
     {
+        // check if we can reduce the type to a lower level
+        // e.g.ActionResult<T> is the same as T.
+        // we don't need to convert ActionResult or Task
         var def = type.GetGenericTypeDefinition();
+
+        if (def == typeof(ActionResult<>))
+        {
+            if (type.GenericTypeArguments.Length == 0)
+                return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
+
+            return Convert(type.GenericTypeArguments[0]);
+        }
+
         if (def == typeof(Nullable<>))
         {
             return SetCache(type, new TsUnion(new TsPrimitive(TsPrimitive.TsPrimitiveType.Null),
                 Convert(type.GenericTypeArguments[0])));
         }
 
+        return new TsVoid();
+
+        var defType = AddEmptyInterface(type);
         // if type is a generic ie: PaginationResponse<Dog>
         // then we need to convert PaginationResponse<T> and Dog
         // and return the reference to PaginationResponse with filled generic Dog.
@@ -189,8 +190,13 @@ public static class TsConverter
 
         // type.GetGenericTypeDefinition() == PaginationResponse`1
         // type.GetGenericTypeDefinition().GetGenericArguments() == [T]
-        var defType = Convert(def) as TsInterface;
-        return SetCache(type, new TsGenericReference(defType!, genericsArgs));
+        var from = Convert(def);
+        if (from is TsInterface inter)
+        {
+            defType.CopyFrom(inter);
+        }
+
+        return new TsGenericReference(defType!, genericsArgs);
     }
 
     private static TsType ConvertClass(Type type)
