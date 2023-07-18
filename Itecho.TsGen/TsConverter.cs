@@ -19,7 +19,8 @@ public static class TsConverter
 
     private static T SetCache<T>(Type type, T tsType) where T : TsType
     {
-        Cache.Add(type, tsType);
+        // could be already added by TsInterface
+        Cache.TryAdd(type, tsType);
         return tsType;
     }
 
@@ -30,19 +31,20 @@ public static class TsConverter
     {
         if (Cache.TryGetValue(type, out var convert))
             return convert;
-
-        return HandleNullable(ConvertType(type), type, nullable);
+        
+        var converted = ConvertType(type);
+        return SetCache(type, converted);
     }
 
-    private static TsType HandleNullable(TsType ret, Type type, bool nullable = false)
-    {
-        if (nullable || type.IsNullable())
-        {
-            return new TsUnion(ret, new TsPrimitive(TsPrimitive.TsPrimitiveType.Null));
-        }
-
-        return ret;
-    }
+    // private static TsType HandleNullable(TsType ret, Type type, bool nullable = false)
+    // {
+    //     if (nullable || type.IsNullable())
+    //     {
+    //         return new TsUnion(ret, new TsPrimitive(TsPrimitive.TsPrimitiveType.Null));
+    //     }
+    //
+    //     return ret;
+    // }
 
     private static TsType ConvertType(Type type)
     {
@@ -97,7 +99,7 @@ public static class TsConverter
         var values = Enum.GetValues(type).Cast<int>();
         var options = names.Zip(values).ToDictionary(t => t.First, t => t.Second);
         // for now all enums are strings
-        return SetCache(type, new TsEnum(TsEnum.TsEnumValueType.String, options));
+        return new TsEnum(TsEnum.TsEnumValueType.String, options);
     }
 
     private static TsType ConvertNonPrimitive(Type type)
@@ -105,12 +107,12 @@ public static class TsConverter
         // controllers returning generic object or ActionResult<T> will be converted to unknown in TS
         // unknown almost better than any as you need safeguards before accessing   
         if (type == typeof(object) || type == typeof(ActionResult))
-            return SetCache(type, new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown));
+            return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
         // convert IFormFile to File in TS, which is build in
         if (type == typeof(IFormFile))
         {
-            return SetCache(type, new TsBuildInType(TsBuildInType.BuildInTypes.File));
+            return new TsBuildInType(TsBuildInType.BuildInTypes.File);
         }
 
         // First check dictionary then array because Dictionary inherits from IEnumerable
@@ -121,12 +123,12 @@ public static class TsConverter
 
         if (type.IsArray())
         {
-            return SetCache(type, new TsArray(Convert(type.GetElementType()!)));
+            return new TsArray(Convert(type.GetElementType()!));
         }
 
         if (type.IsEnumerable())
         {
-            return SetCache(type, new TsArray(Convert(type.GetGenericArguments()[0])));
+            return new TsArray(Convert(type.GetGenericArguments()[0]));
         }
 
 
@@ -172,11 +174,10 @@ public static class TsConverter
 
         if (def == typeof(Nullable<>))
         {
-            return SetCache(type, new TsUnion(new TsPrimitive(TsPrimitive.TsPrimitiveType.Null),
-                Convert(type.GenericTypeArguments[0])));
+            return new TsUnion(new TsPrimitive(TsPrimitive.TsPrimitiveType.Null),
+                Convert(type.GenericTypeArguments[0]));
         }
 
-        return new TsVoid();
 
         var defType = AddEmptyInterface(type);
         // if type is a generic ie: PaginationResponse<Dog>
@@ -233,6 +234,6 @@ public static class TsConverter
         if (args.Length != 2)
             throw new ArgumentException("Dictionary should have 2 generic arguments");
 
-        return SetCache(type, new TsDictionary(Convert(args[0]), Convert(args[1])));
+        return new TsDictionary(Convert(args[0]), Convert(args[1]));
     }
 }
