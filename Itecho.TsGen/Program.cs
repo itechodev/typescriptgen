@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Itecho.TsGen.TsTypes;
 
 namespace Itecho.TsGen;
 
@@ -27,10 +28,6 @@ public static class Program
 {
     static void Main(string[] args)
     {
-        var tsType = TsConverter.Convert(typeof(SomeResponse));
-
-        return;
-
         if (args.Length == 0)
         {
             var versionString = Assembly.GetEntryAssembly()?
@@ -51,7 +48,17 @@ public static class Program
         var loadContext = new DependencyLoadContext(assemblyPath);
         var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
 
+
         var controllers = ControllerInspector.Inspect(assembly);
+
+        var interfaces = TsConverter.Cache.Values
+            .Where(t => t.Type is TsInterface)
+            .Select(t => t.Type as TsInterface)
+            .ToList();
+
+
+        return;
+
 
         Console.WriteLine(string.Join("\n", controllers.Select(t => t.Name)));
     }

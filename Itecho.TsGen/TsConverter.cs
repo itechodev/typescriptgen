@@ -5,21 +5,43 @@ using Newtonsoft.Json;
 
 namespace Itecho.TsGen;
 
+/// <summary>
+/// reference types to cache
+/// smart pointer to TsType which can be populate later 
+/// </summary>
+public class CacheValue
+{
+    public TsType Type { get; set; }
+
+    public CacheValue(TsType type)
+    {
+        Type = type;
+    }
+}
+
 public static class TsConverter
 {
-    public static readonly Dictionary<Type, TsType> Cache = new();
+    public static readonly Dictionary<Type, CacheValue> Cache = new();
 
 
-    private static TsType AddCache(Type type, Func<TsType> create)
+    private static void AddCache(Type type)
     {
-        var tsType = create();
-        Cache.Add(type, tsType);
-        return tsType;
+        // add empty value to cache before filling it
+        // used to prevent recursion and avoid duplicate visits
+        Cache.Add(type, new CacheValue(new TsVoid()));
     }
 
-    private static TsType AddCache(Type type, TsType create)
+    private static TsType SetCache(Type type, TsType create)
     {
-        Cache.Add(type, create);
+        if (Cache.TryGetValue(type, out var value))
+        {
+            value.Type = create;
+        }
+        else
+        {
+            Cache.Add(type, new CacheValue(create));
+        }
+
         return create;
     }
 
@@ -29,10 +51,17 @@ public static class TsConverter
     public static TsType Convert(Type type, bool nullable = false)
     {
         if (Cache.TryGetValue(type, out var convert))
-            return convert;
+            return convert.Type;
 
-        var ret = ConvertType(type);
-        // handle nullability
+        AddCache(type);
+        var ret = HandleNullable(ConvertType(type), type, nullable);
+        SetCache(type, ret);
+
+        return ret;
+    }
+
+    private static TsType HandleNullable(TsType ret, Type type, bool nullable = false)
+    {
         if (nullable || type.IsNullable())
         {
             return new TsUnion(ret, new TsPrimitive(TsPrimitive.TsPrimitiveType.Null));
@@ -89,16 +118,12 @@ public static class TsConverter
 
     private static TsType ConvertEnum(Type type)
     {
-        return AddCache(type, () =>
-        {
-            var names = Enum.GetNames(type);
-            // the underlying type for all enums are numeric
-            var values = Enum.GetValues(type).Cast<int>();
-            var options = names.Zip(values).ToDictionary(t => t.First, t => t.Second);
-
-            // for now all enums are strings
-            return new TsEnum(TsEnum.TsEnumValueType.String, options);
-        });
+        var names = Enum.GetNames(type);
+        // the underlying type for all enums are numeric
+        var values = Enum.GetValues(type).Cast<int>();
+        var options = names.Zip(values).ToDictionary(t => t.First, t => t.Second);
+        // for now all enums are strings
+        return new TsEnum(TsEnum.TsEnumValueType.String, options);
     }
 
     private static TsType ConvertNonPrimitive(Type type)
@@ -106,12 +131,12 @@ public static class TsConverter
         // controllers returning generic object or ActionResult<T> will be converted to unknown in TS
         // unknown almost better than any as you need safeguards before accessing   
         if (type == typeof(object) || type == typeof(ActionResult))
-            return AddCache(type, new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown));
+            return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
         // convert IFormFile to File in TS, which is build in
         if (type == typeof(IFormFile))
         {
-            return AddCache(type, () => new TsBuildInType(TsBuildInType.BuildInTypes.File));
+            return new TsBuildInType(TsBuildInType.BuildInTypes.File);
         }
 
         // First check dictionary then array because Dictionary inherits from IEnumerable
@@ -122,12 +147,12 @@ public static class TsConverter
 
         if (type.IsArray())
         {
-            return AddCache(type, new TsArray(Convert(type.GetElementType()!)));
+            return new TsArray(Convert(type.GetElementType()!));
         }
 
         if (type.IsEnumerable())
         {
-            return AddCache(type, new TsArray(Convert(type.GetGenericArguments()[0])));
+            return new TsArray(Convert(type.GetGenericArguments()[0]));
         }
 
         if (type.IsGenericType)
@@ -139,11 +164,14 @@ public static class TsConverter
             if (genericTypeDef == typeof(ActionResult<>))
             {
                 if (type.GenericTypeArguments.Length == 0)
-                    return AddCache(genericTypeDef, new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown));
+                    return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
                 type = type.GenericTypeArguments[0];
             }
+        }
 
+        if (type.IsGenericType)
+        {
             return ConvertGeneric(type);
         }
 
@@ -169,19 +197,26 @@ public static class TsConverter
 
     private static TsType ConvertGeneric(Type type)
     {
+        var def = type.GetGenericTypeDefinition();
+        if (def == typeof(Nullable<>))
+        {
+            return new TsUnion(new TsPrimitive(TsPrimitive.TsPrimitiveType.Null),
+                Convert(type.GenericTypeArguments[0]));
+        }
+
         // if type is a generic ie: PaginationResponse<Dog>
         // then we need to convert PaginationResponse<T> and Dog
         // and return the reference to PaginationResponse with filled generic Dog.
         // type.GetGenericArguments() == [Dog]
         var genericsArgs = type
             .GetGenericArguments()
-            .Select(p => p.IsGenericParameter ? new TsGeneric(p.Name) : ConvertType(p))
+            .Select(p => p.IsGenericParameter ? new TsGeneric(p.Name) : Convert(p))
             .ToArray();
 
         // type.GetGenericTypeDefinition() == PaginationResponse`1
         // type.GetGenericTypeDefinition().GetGenericArguments() == [T]
-        var defType = ConvertClass(type.GetGenericTypeDefinition()) as TsInterface;
-        return AddCache(type, new TsGenericReference(defType!, genericsArgs));
+        var defType = Convert(def) as TsInterface;
+        return new TsGenericReference(defType!, genericsArgs);
     }
 
     private static TsType ConvertClass(Type type)
@@ -205,7 +240,7 @@ public static class TsConverter
             .Select(g => new TsGeneric(g.Name))
             .ToArray();
 
-        return AddCache(type, new TsInterface(FormatName(type.Name), members, extends as TsInterface, generics));
+        return new TsInterface(FormatName(type.Name), members, extends as TsInterface, generics);
     }
 
     private static TsType ConvertDictionary(Type type)
@@ -214,6 +249,6 @@ public static class TsConverter
         if (args.Length != 2)
             throw new ArgumentException("Dictionary should have 2 generic arguments");
 
-        return AddCache(type, new TsDictionary(Convert(args[0]), Convert(args[1])));
+        return new TsDictionary(Convert(args[0]), Convert(args[1]));
     }
 }
