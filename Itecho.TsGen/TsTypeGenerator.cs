@@ -1,4 +1,4 @@
-using Itecho.TsGen.Ts.Types;
+using Itecho.TsGen.TsTypes;
 
 namespace Itecho.TsGen;
 

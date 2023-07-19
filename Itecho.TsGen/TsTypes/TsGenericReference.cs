@@ -1,4 +1,4 @@
-namespace Itecho.TsGen.Ts.Types;
+namespace Itecho.TsGen.TsTypes;
 
 /// <summary>
 /// A reference to an interface with generic parameters

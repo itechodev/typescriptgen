@@ -1,4 +1,4 @@
-namespace Itecho.TsGen.Ts.Types;
+namespace Itecho.TsGen.TsTypes;
 
 /// <summary>
 /// Build in non-primitive types such as File 

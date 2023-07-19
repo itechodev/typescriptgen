@@ -1,8 +1,8 @@
-namespace Itecho.TsGen.Ts.Types;
+namespace Itecho.TsGen.TsTypes;
 
 /// <summary>
 /// Represent void in Typescript 
 /// </summary>
-public class TsVoid : TsType
+public class TsVoid: TsType
 {
 }

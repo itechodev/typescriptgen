@@ -1,5 +1,5 @@
 using System.Reflection;
-using Itecho.TsGen.Ts.Types;
+using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Itecho.TsGen;
