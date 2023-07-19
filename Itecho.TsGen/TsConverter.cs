@@ -1,6 +1,7 @@
 using System.Reflection;
 using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Itecho.TsGen;
 
@@ -121,6 +122,12 @@ public static class TsConverter
             return new TsBuildInType(TsBuildInType.BuildInTypes.File);
         }
 
+        // Microsoft.AspNetCore.Mvc.FileContentResult
+        if (type.Assembly.FullName.StartsWith("Microsoft.AspNetCore.Mvc"))
+        {
+            return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
+        }
+
         // First check dictionary then array because Dictionary inherits from IEnumerable
         if (type.IsDictionary())
         {
@@ -217,8 +224,13 @@ public static class TsConverter
             : null;
 
         var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
-            .Select(p =>
-                new TsInterface.TsInterfaceMember(p.Name, Convert(p.PropertyType, NullableHelper.IsNullable(p))))
+            .Select(p => {
+
+                var a = p.GetCustomAttributes();
+                var json = p.GetCustomAttribute<JsonPropertyAttribute>();
+                var name = json?.PropertyName ?? p.Name;
+                return new TsInterface.TsInterfaceMember(name, Convert(p.PropertyType, NullableHelper.IsNullable(p)));
+            })
             .ToArray();
 
         var generics = type

@@ -99,6 +99,8 @@ public class TsInterface : TsType
         GetReferenceType(list, Members.Select(m => m.Type));
 
         return list
+            .Distinct()
+            .Where(n => n != Name)
             .OrderBy(n => n)
             .ToList();
     }
