@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Itecho.TsGen.TSExpressions;
 
 namespace Itecho.TsGen;
 
@@ -21,6 +22,7 @@ public class TsCodeGenerator
 
     public void Write(string text)
     {
+        _builder.Append(text);
     }
 
     public void WriteLine(params string[] lines)
@@ -30,12 +32,12 @@ public class TsCodeGenerator
     }
 
     // wrap writings inside a block with indenting
-    public void Block(Action<TsCodeGenerator> action)
+    public void Block(Action action)
     {
-        Write("{");
+        Write(" {");
         WriteLine();
         Indent();
-        action.Invoke(this);
+        action.Invoke();
         Outdent();
         WriteLine("}");
     }
@@ -53,5 +55,10 @@ public class TsCodeGenerator
     public void WriteToFile(string fileName)
     {
         File.WriteAllText(fileName, _builder.ToString());
+    }
+
+    public void Write(TsExp expression)
+    {
+        expression.Write(this);
     }
 }
