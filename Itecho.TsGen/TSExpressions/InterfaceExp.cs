@@ -28,7 +28,7 @@ public class InterfaceExp : TsStandaloneExp
         {
             foreach (var member in @Interface.Members)
             {
-                gen.WriteLine($"{member.Name}: {TsTypeGenerator.Generate(member.Type)};");
+                gen.WriteLine($"{FormatHelper.CamelCase(member.Name)}: {TsTypeGenerator.Generate(member.Type)};");
             }
         });
     }

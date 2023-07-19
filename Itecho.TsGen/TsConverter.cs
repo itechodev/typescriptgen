@@ -1,7 +1,6 @@
 using System.Reflection;
 using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Itecho.TsGen;
 
@@ -211,10 +210,8 @@ public static class TsConverter
         var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
             .Select(p =>
             {
-                var json = p.GetCustomAttribute<JsonPropertyAttribute>();
-                var propName = json?.PropertyName ?? p.Name;
                 var nullable = type.IsNullable() || NullableHelper.IsNullable(p);
-                return new TsInterface.TsInterfaceMember(propName, Convert(p.PropertyType, nullable));
+                return new TsInterface.TsInterfaceMember(p.Name, Convert(p.PropertyType, nullable));
             })
             .ToArray();
 
