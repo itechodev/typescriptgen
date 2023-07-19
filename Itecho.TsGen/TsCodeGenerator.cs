@@ -3,30 +3,6 @@ using System.Text.Json;
 
 namespace Itecho.TsGen;
 
-public class NamedImport
-{
-    // import {name} from ..
-    public string Name { get; }
-
-    // import {type name} from
-    public bool IsTyped { get; }
-
-    public NamedImport(string name, bool isTyped)
-    {
-        Name = name;
-        IsTyped = isTyped;
-    }
-
-    public string Generate()
-    {
-        var str = IsTyped
-            ? "type " + Name
-            : Name;
-
-        return $"{str}";
-    }
-}
-
 public class TsCodeGenerator
 {
     private int _indent;
@@ -67,15 +43,6 @@ public class TsCodeGenerator
     public static string CamelCase(string s)
     {
         return JsonNamingPolicy.CamelCase.ConvertName(s);
-    }
-
-    public void Import(string library, string? @default, params NamedImport[] imports)
-    {
-        var strings = imports.Select(i => i.Generate());
-        if (@default != null)
-            strings = strings.Prepend(@default);
-
-        WriteLine($"import {{ {string.Join(", ", strings)} }} from '{library}';");
     }
 
     public void Function(string name, params string[] args)
