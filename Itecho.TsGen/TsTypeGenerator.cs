@@ -4,7 +4,6 @@ namespace Itecho.TsGen;
 
 public class TsTypeGenerator
 {
-
     public string Generate(TsType type)
     {
         return type switch

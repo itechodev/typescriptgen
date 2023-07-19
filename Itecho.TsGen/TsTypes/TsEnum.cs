@@ -8,11 +8,14 @@ public class TsEnum : TsType
         String,
         Number
     }
-    public TsEnumValueType ValueType { get; set; }
-    public Dictionary<string, int> Values { get; set; }
 
-    public TsEnum(TsEnumValueType valueType, Dictionary<string, int> values)
+    public string Name { get; }
+    public TsEnumValueType ValueType { get; }
+    public Dictionary<string, int> Values { get; }
+
+    public TsEnum(string name, TsEnumValueType valueType, Dictionary<string, int> values)
     {
+        Name = name;
         ValueType = valueType;
         Values = values;
     }

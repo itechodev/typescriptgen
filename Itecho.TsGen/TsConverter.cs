@@ -31,7 +31,7 @@ public static class TsConverter
     {
         if (Cache.TryGetValue(type, out var convert))
             return convert;
-        
+
         var converted = ConvertType(type);
         return SetCache(type, converted);
     }
@@ -99,7 +99,7 @@ public static class TsConverter
         var values = Enum.GetValues(type).Cast<int>();
         var options = names.Zip(values).ToDictionary(t => t.First, t => t.Second);
         // for now all enums are strings
-        return new TsEnum(TsEnum.TsEnumValueType.String, options);
+        return new TsEnum(type.Name, TsEnum.TsEnumValueType.String, options);
     }
 
     private static TsType ConvertNonPrimitive(Type type)
@@ -197,7 +197,7 @@ public static class TsConverter
             defType.CopyFrom(inter);
         }
 
-        return new TsGenericReference(defType!, genericsArgs);
+        return new TsGenericReference(defType, genericsArgs);
     }
 
     private static TsType ConvertClass(Type type)
@@ -209,7 +209,8 @@ public static class TsConverter
             : null;
 
         var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
-            .Select(p => {
+            .Select(p =>
+            {
                 var json = p.GetCustomAttribute<JsonPropertyAttribute>();
                 var propName = json?.PropertyName ?? p.Name;
                 var nullable = type.IsNullable() || NullableHelper.IsNullable(p);

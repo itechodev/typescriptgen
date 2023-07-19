@@ -6,7 +6,6 @@ public class TsPrimitive : TsType
     {
         Undefined,
         Null,
-        Literal,
         String,
         Number,
         Boolean,
