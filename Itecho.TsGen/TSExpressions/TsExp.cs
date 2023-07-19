@@ -19,4 +19,6 @@ public abstract class TsExp : TsExpBase
     public static DefaultExportExp DefaultExport(TsExpBase exp) => new(exp);
     public static NamedExportExp NamedExport(TsStandaloneExp exp) => new(exp);
     public static InterfaceExp Interface(TsInterface @interface) => new(@interface);
+
+    public static TsEmptyLineExp EmptyLine() => new();
 }
