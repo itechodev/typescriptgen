@@ -3,10 +3,10 @@ namespace Itecho.TsGen.TSExpressions;
 /// <summary>
 /// ES6 imports must be found at the top level of your module
 /// </summary>
-public class ImportExp
+public class ImportExp : TsStandaloneExp
 {
     public string Library { get; }
-    public string? Default { get; }
+    public NamedImport? Default { get; }
     public NamedImport[] Imports { get; }
 
     public class NamedImport
@@ -33,19 +33,20 @@ public class ImportExp
         }
     }
 
-    public ImportExp(string library, string? @default, params NamedImport[] imports)
+    public ImportExp(string library, NamedImport? @default, params NamedImport[] imports)
     {
         Library = library;
         Default = @default;
         Imports = imports;
     }
 
-    public void Write(TsCodeGenerator gen)
+    public override void Write(TsCodeGenerator gen)
     {
-        var strings = Imports.Select(i => i.Generate());
-        if (@Default != null)
-            strings = strings.Prepend(@Default);
-
-        gen.WriteLine($"import {{ {string.Join(", ", strings)} }} from '{Library}';");
+        gen.WriteLine(FormatHelper.Spaces(
+            "import",
+            @Default?.Generate(),
+            string.Join(", ", Imports.Select(i => i.Generate())),
+            $"from \"{Library}\";"
+        ));
     }
 }

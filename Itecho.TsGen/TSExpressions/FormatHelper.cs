@@ -8,4 +8,9 @@ public static class FormatHelper
     {
         return JsonNamingPolicy.CamelCase.ConvertName(s);
     }
+
+    public static string Spaces(params string?[] list)
+    {
+        return string.Join(" ", list.Where(l => !string.IsNullOrEmpty(l)));
+    }
 }

@@ -50,4 +50,38 @@ public class TsInterface : TsType
         Extends = extends;
         Generics = generics;
     }
+
+    private static List<string> GetReferencedTypes(params TsType[] list)
+    {
+        var ret = new List<string>();
+        foreach (var m in list)
+        {
+            switch (m)
+            {
+                case TsInterface @interface:
+                    ret.Add(@interface.Name);
+                    continue;
+                case TsGenericReference genericReference:
+                    ret.Add(genericReference.ReferencedType.Name);
+                    // also add potential generic parameters
+                    ret.AddRange(GetReferencedTypes(genericReference.Parameters));
+                    continue;
+                case TsEnum @enum:
+                    ret.Add(@enum.Name);
+                    continue;
+                case TsArray array:
+                    ret.AddRange(GetReferencedTypes(array.ElementType));
+                    continue;
+            }
+        }
+
+        return ret.Distinct().ToList();
+    }
+
+    public List<string> GetReferencedTypes()
+    {
+        return GetReferencedTypes(Members.Select(m => m.Type).ToArray())
+            .OrderBy(n => n)
+            .ToList();
+    }
 }

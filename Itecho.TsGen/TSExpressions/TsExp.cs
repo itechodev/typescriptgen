@@ -13,7 +13,7 @@ public abstract class TsExp : TsExpBase
     public static CommentExp Comment(string comment, bool isJsDoc = false) => new(comment, isJsDoc);
     public static MultilineCommentExp MultilineComment(params string[] lines) => new(lines);
 
-    public static ImportExp Import(string library, string? @default, params ImportExp.NamedImport[] imports) =>
+    public static ImportExp Import(string library, ImportExp.NamedImport @default, params ImportExp.NamedImport[] imports) =>
         new(library, @default, imports);
 
     public static DefaultExportExp DefaultExport(TsExpBase exp) => new(exp);
