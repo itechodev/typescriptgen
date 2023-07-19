@@ -1,6 +1,6 @@
 using System.Reflection;
+namespace Itecho.TsGen.Ts.Types;
 
-namespace Itecho.TsGen.TsTypes;
 
 /// <summary>
 /// Represents an TS interface.

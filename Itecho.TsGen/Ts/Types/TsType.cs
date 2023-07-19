@@ -1,4 +1,4 @@
-namespace Itecho.TsGen.TsTypes
+namespace Itecho.TsGen.Ts.Types
 {
     /// <summary>
     /// base of all TS types

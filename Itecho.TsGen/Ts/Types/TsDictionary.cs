@@ -1,4 +1,4 @@
-namespace Itecho.TsGen.TsTypes;
+namespace Itecho.TsGen.Ts.Types;
 
 public class TsDictionary : TsType
 {

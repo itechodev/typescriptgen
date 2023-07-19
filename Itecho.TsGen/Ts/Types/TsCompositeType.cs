@@ -1,4 +1,4 @@
-namespace Itecho.TsGen.TsTypes;
+namespace Itecho.TsGen.Ts.Types;
 
 /// <summary>
 /// Base for composite types such as union, intersection, tuples

@@ -1,5 +1,5 @@
 using System.Reflection;
-using Itecho.TsGen.TsTypes;
+using Itecho.TsGen.Ts.Types;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 

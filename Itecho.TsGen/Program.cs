@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Itecho.TsGen.TsTypes;
+using Itecho.TsGen.Ts.Types;
 
 namespace Itecho.TsGen;
 
@@ -29,7 +29,6 @@ public static class Program
         // using a custom AssemblyLoadContext and AssemblyDependencyResolver
         var loadContext = new DependencyLoadContext(assemblyPath);
         var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
-
 
         var controllers = ControllerInspector.Inspect(assembly);
 

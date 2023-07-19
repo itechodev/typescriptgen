@@ -1,4 +1,4 @@
-namespace Itecho.TsGen.TsTypes;
+namespace Itecho.TsGen.Ts.Types;
 
 /// <summary>
 /// types Union = type1 | type2 | type3
