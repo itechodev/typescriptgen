@@ -29,21 +29,28 @@ public static class TsConverter
     public static TsType Convert(Type type, bool nullable = false)
     {
         if (Cache.TryGetValue(type, out var convert))
-            return convert;
+            return HandleNullable(convert, type, nullable);
 
         var converted = ConvertType(type);
-        return SetCache(type, converted);
+        return HandleNullable(SetCache(type, converted), type, nullable);
     }
 
-    // private static TsType HandleNullable(TsType ret, Type type, bool nullable = false)
-    // {
-    //     if (nullable || type.IsNullable())
-    //     {
-    //         return new TsUnion(ret, new TsPrimitive(TsPrimitive.TsPrimitiveType.Null));
-    //     }
-    //
-    //     return ret;
-    // }
+    // nullables are not always stored with the type
+    // therefore we cannot cache the type alone
+    private static TsType HandleNullable(TsType ret, Type type, bool nullable = false)
+    {
+        if (!nullable && !type.IsNullable()) return ret;
+        // union already contains null
+        // by Nullable<T> generic check
+        if (ret is not TsUnion tsUnion) return new TsUnion(ret, new TsPrimitive(TsPrimitive.TsPrimitiveType.Null));
+
+        if (tsUnion.ContainsNull)
+            return tsUnion;
+
+        // add null to union type
+        var t = tsUnion.Types.Append(new TsPrimitive(TsPrimitive.TsPrimitiveType.Null));
+        return new TsUnion(t.ToArray());
+    }
 
     private static TsType ConvertType(Type type)
     {
@@ -173,8 +180,10 @@ public static class TsConverter
 
         if (def == typeof(Nullable<>))
         {
-            return new TsUnion(new TsPrimitive(TsPrimitive.TsPrimitiveType.Null),
-                Convert(type.GenericTypeArguments[0]));
+            return new TsUnion(
+                Convert(type.GenericTypeArguments[0]),
+                new TsPrimitive(TsPrimitive.TsPrimitiveType.Null)
+            );
         }
 
 
@@ -209,10 +218,7 @@ public static class TsConverter
 
         var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
             .Select(p =>
-            {
-                var nullable = type.IsNullable() || NullableHelper.IsNullable(p);
-                return new TsInterface.TsInterfaceMember(p.Name, Convert(p.PropertyType, nullable));
-            })
+                new TsInterface.TsInterfaceMember(p.Name, Convert(p.PropertyType, NullableHelper.IsNullable(p))))
             .ToArray();
 
         var generics = type
