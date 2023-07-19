@@ -123,7 +123,7 @@ public static class TsConverter
         }
 
         // Microsoft.AspNetCore.Mvc.FileContentResult
-        if (type.Assembly.FullName.StartsWith("Microsoft.AspNetCore.Mvc"))
+        if (type.Assembly.FullName?.StartsWith("Microsoft.AspNetCore.Mvc") ?? false)
         {
             return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
         }

@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace Itecho.TsGen;
 
 public static class TypeExtensions
@@ -18,9 +20,7 @@ public static class TypeExtensions
 
     public static bool IsEnumerable(this Type type)
     {
-        return type
-            .GetInterfaces()
-            .Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+        return typeof(IEnumerable).IsAssignableFrom(type);
     }
 
     public static bool IsNullable(this Type type)
