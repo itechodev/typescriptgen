@@ -51,39 +51,52 @@ public class TsInterface : TsType
         Generics = generics;
     }
 
-    private static List<string> GetReferencedTypes(params TsType[] list)
+    private static void GetReferenceType(List<string> ret, IEnumerable<TsType> list)
     {
-        var ret = new List<string>();
         foreach (var m in list)
         {
-            switch (m)
-            {
-                case TsInterface @interface:
-                    ret.Add(@interface.Name);
-                    continue;
-                case TsGenericReference genericReference:
-                    ret.Add(genericReference.ReferencedType.Name);
-                    // also add potential generic parameters
-                    ret.AddRange(GetReferencedTypes(genericReference.Parameters));
-                    continue;
-                case TsEnum @enum:
-                    ret.Add(@enum.Name);
-                    continue;
-                case TsArray array:
-                    ret.AddRange(GetReferencedTypes(array.ElementType));
-                    continue;
-            }
+            GetReferenceType(ret, m);
         }
-
-        return ret.Distinct().ToList();
     }
 
+    private static void GetReferenceType(List<string> ret, TsType type)
+    {
+        switch (type)
+        {
+            case TsInterface @interface:
+                ret.Add(@interface.Name);
+                return;
+            case TsGenericReference genericReference:
+                ret.Add(genericReference.ReferencedType.Name);
+                // also add potential generic parameters
+                GetReferenceType(ret, genericReference.Parameters);
+                return;
+            case TsEnum @enum:
+                ret.Add(@enum.Name);
+                return;
+            case TsArray array:
+                GetReferenceType(ret, array.ElementType);
+                return;
+            case TsDictionary dictionary:
+                GetReferenceType(ret, dictionary.Key);
+                GetReferenceType(ret, dictionary.Value);
+                return;
+            case TsUnion union:
+                GetReferenceType(ret, union.Types);
+                return;
+            case TsIntersection intersection:
+                GetReferenceType(ret, intersection.Types);
+                return;
+        }
+    }
+    
     public List<string> GetReferencedTypes()
     {
-        var list = GetReferencedTypes(Members.Select(m => m.Type).ToArray());
-
+        var list = new List<string>();
         if (Extends != null)
             list.Add(Extends.Name);
+
+        GetReferenceType(list, Members.Select(m => m.Type));
 
         return list
             .OrderBy(n => n)
