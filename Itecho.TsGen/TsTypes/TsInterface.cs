@@ -80,7 +80,12 @@ public class TsInterface : TsType
 
     public List<string> GetReferencedTypes()
     {
-        return GetReferencedTypes(Members.Select(m => m.Type).ToArray())
+        var list = GetReferencedTypes(Members.Select(m => m.Type).ToArray());
+
+        if (Extends != null)
+            list.Add(Extends.Name);
+
+        return list
             .OrderBy(n => n)
             .ToList();
     }
