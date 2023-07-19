@@ -5,4 +5,7 @@ namespace Itecho.TsGen.TsTypes;
 /// </summary>
 public class TsTuple : TsCompositeType
 {
+    public TsTuple(params TsType[] types) : base(types)
+    {
+    }
 }

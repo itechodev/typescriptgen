@@ -177,6 +177,11 @@ public static class TsConverter
         // we don't need to convert ActionResult or Task
         var def = type.GetGenericTypeDefinition();
 
+        if (def.IsTupple())
+        {
+            return new TsTuple(type.GenericTypeArguments.Select(g => Convert(g)).ToArray());
+        }
+
         if (def == typeof(ActionResult<>))
         {
             if (type.GenericTypeArguments.Length == 0)
@@ -225,8 +230,6 @@ public static class TsConverter
 
         var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
             .Select(p => {
-
-                var a = p.GetCustomAttributes();
                 var json = p.GetCustomAttribute<JsonPropertyAttribute>();
                 var name = json?.PropertyName ?? p.Name;
                 return new TsInterface.TsInterfaceMember(name, Convert(p.PropertyType, NullableHelper.IsNullable(p)));
