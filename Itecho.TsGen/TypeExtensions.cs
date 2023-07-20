@@ -28,7 +28,7 @@ public static class TypeExtensions
         return Nullable.GetUnderlyingType(type) != null;
     }
 
-    public static bool IsTupple(this Type type)
+    public static bool IsTuple(this Type type)
     {
         return type == typeof(ValueTuple<>)
                || type == typeof(ValueTuple<,>)

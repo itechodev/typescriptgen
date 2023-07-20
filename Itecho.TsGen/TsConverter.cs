@@ -177,7 +177,7 @@ public static class TsConverter
         // we don't need to convert ActionResult or Task
         var def = type.GetGenericTypeDefinition();
 
-        if (def.IsTupple())
+        if (def.IsTuple())
         {
             return new TsTuple(type.GenericTypeArguments.Select(g => Convert(g)).ToArray());
         }
