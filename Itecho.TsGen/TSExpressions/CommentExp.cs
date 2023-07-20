@@ -14,7 +14,7 @@ public class CommentExp : TsStandaloneExp
     public override void Write(TsCodeGenerator gen)
     {
         if (IsJsDoc)
-            gen.WriteLine($"/** {Comment} */");
+            gen.WriteLine($"/* {Comment} */");
         else
             gen.WriteLine($"// {Comment}");
     }

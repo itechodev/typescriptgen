@@ -21,4 +21,15 @@ public abstract class TsExp : TsExpBase
     public static InterfaceExp Interface(TsInterface @interface) => new(@interface);
 
     public static TsEmptyLineExp EmptyLine() => new();
+    public static DictionaryExp Dictionary(Dictionary<TsExp, TsExp> values) => new(values);
+    public static FunctionExp Function(string name, TsType returnType, IEnumerable<TsParameter> parameters, TsBlockExp block) => new(name, returnType, parameters, block);
+
+    public static ConstExp String(string value) => new(value);
+    public static ConstExp Number(int value) => new(value);
+    public static ConstExp Number(double value) => new(value);
+    public static ConstExp Boolean(bool value) => new(value);
+    public static ReturnExp Return(TsExp expression) => new(expression);
+    public static TsBlockExp Block(params TsStandaloneExp[] lines) => new(lines);
+    public static TsParameter Parameter(string name, TsType type) => new(name, type);
+    public static AssignExp
 }
