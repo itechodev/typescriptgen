@@ -69,33 +69,20 @@ public static class Program
         var urls = controller
             .Actions
             .Where(r => r.Kind == ActionKind.Get)
-            .ToDictionary(g => g.Name, g => TsExp.Function(
-                FormatHelper.CamelCase(g.Name),
-                new TsPrimitive(TsPrimitive.TsPrimitiveType.String),
-                g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
-                TsExp.Block(
-                    TsExp.Return(TsExp.String(RouteHelper.BuildUrl(controller, g)))
-                )
-            ));
+            .Select(g => new DictionaryEntry(TsExp.String(g.Name),
+                TsExp.Function(
+                    FormatHelper.CamelCase(g.Name),
+                    TsPrimitive.String(),
+                    g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
+                    TsExp.Block(
+                        TsExp.Return(TsExp.String(RouteHelper.BuildUrl(controller, g)))
+                    )
+                )));
 
-        // TsExp.Function()
-
-
-        // foreach (var getMethod in getMethods)
-        // {
-        //     var paramsList = string.Join(", ",
-        //         getMethod.Parameters.Select(p =>
-        //             $"{TsGenerator.CamelCase(p.Parameter.Name)}: {TsGenerator.ToDefString(p.TsType)}"));
-        //
-        //     code.WriteLine($"{TsGenerator.CamelCase(getMethod.Action.Name)}({paramsList}): string " + "{");
-        //     code.Indent();
-        //     code.WriteLine($"return {BuildUrl(controller, getMethod.Action)};");
-        //     code.Outdent();
-        //     code.WriteLine("}" + (getMethod != getMethods.Last() ? "," : ""));
-        // }
-        //
-        // TsExp.Dictionary()
-
+        tsFile.Add(TsExp.Assign(
+            TsExp.Variable("urls", VariableType.Const, null),
+            TsExp.Dictionary(urls)
+        ));
 
         tsFile.WriteToFile(Path.Combine("/Users/willembijker/projects/itest-leaf/Web/ClientApp/src/controllers",
             controller.Name));

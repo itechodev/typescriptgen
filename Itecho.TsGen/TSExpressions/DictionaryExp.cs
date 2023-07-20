@@ -1,12 +1,24 @@
 namespace Itecho.TsGen.TSExpressions;
 
-public class DictionaryExp : TsExp
+public class DictionaryEntry
 {
-    public Dictionary<TsExp, TsExp> Values { get; }
+    public TsExp Key { get; }
+    public TsExp Value { get; }
 
-    public DictionaryExp(Dictionary<TsExp, TsExp> values)
+    public DictionaryEntry(TsExp key, TsExp value)
     {
-        Values = values;
+        Key = key;
+        Value = value;
+    }
+}
+
+public class DictionaryExp: TsExp 
+{
+    public IEnumerable<DictionaryEntry> Entries { get; }
+
+    public DictionaryExp(IEnumerable<DictionaryEntry> entries)
+    {
+        Entries = entries;
     }
 
     public override void Write(TsCodeGenerator gen)
