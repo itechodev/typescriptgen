@@ -18,7 +18,21 @@ public class VariableExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
-        throw new NotImplementedException();
+        gen.Write(VariableTypeString(Type));
+        gen.Write(Name);
+        if (Signature != null)
+        {
+            gen.Write(":");
+            gen.Write(TsTypeGenerator.Generate(Signature));
+        }
     }
-    
+
+    private static string VariableTypeString(VariableType type)
+    {
+        return type switch
+        {
+            VariableType.Const => "const", VariableType.Let => "let", VariableType.Var => "var", _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
 }

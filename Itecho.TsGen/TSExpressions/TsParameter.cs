@@ -12,4 +12,10 @@ public class TsParameter
         Name = name;
         Type = type;
     }
+    public void Write(TsCodeGenerator gen)
+    {
+        gen.Write(Name);
+        gen.Write(":");
+        TsTypeGenerator.Generate(Type);
+    }
 }

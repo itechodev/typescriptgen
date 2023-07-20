@@ -24,10 +24,10 @@ public class TsCodeGenerator
     {
         _builder.Append(text);
     }
-
+    
     public void WriteLine(params string[] lines)
     {
-        _builder.Append(string.Join("," + Environment.NewLine, lines.Select(l => new string(' ', _indent * 4) + l)));
+        _builder.Append(string.Join("\n", lines.Select(l => new string(' ', _indent * 4) + l)));
         _builder.AppendLine();
     }
 

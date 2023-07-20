@@ -74,14 +74,12 @@ public static class Program
             .Actions
             .Where(r => r.Kind == ActionKind.Get)
             .Select(g => new DictionaryEntry(TsExp.String(g.Name),
-                TsExp.Function(
-                    FormatHelper.CamelCase(g.Name),
+                TsExp.Lambda(
                     TsPrimitive.String(),
                     g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
-                    TsExp.Block(
-                        TsExp.Return(TsExp.String(RouteHelper.BuildUrl(controller, g)))
-                    )
+                    TsExp.String(RouteHelper.BuildUrl(controller, g))
                 )));
+
 
         tsFile.Add(TsExp.Assign(
             TsExp.Variable("urls", VariableType.Const, null),

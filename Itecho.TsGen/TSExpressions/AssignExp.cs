@@ -13,5 +13,8 @@ public class AssignExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
+        Assign.Write(gen);
+        gen.Write(" = ");
+        Value.Write(gen);
     }
 }

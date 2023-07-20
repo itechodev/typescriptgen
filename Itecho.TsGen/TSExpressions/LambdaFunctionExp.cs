@@ -2,16 +2,15 @@ using Itecho.TsGen.TsTypes;
 
 namespace Itecho.TsGen.TSExpressions;
 
-public class FunctionExp : TsExp
+public class LambdaFunctionExp : TsExp
 {
-    public string Name { get; }
-    public TsType ReturnType { get; }
+    public TsType? ReturnType { get; }
     public IEnumerable<TsParameter> Parameters { get; }
-    public TsBlockExp Block { get; }
+    // block or implicit return
+    public TsExp Block { get; }
 
-    public FunctionExp(string name, TsType returnType, IEnumerable<TsParameter> parameters, TsBlockExp block)
+    public LambdaFunctionExp(TsType? returnType, IEnumerable<TsParameter> parameters, TsExp block)
     {
-        Name = name;
         ReturnType = returnType;
         Parameters = parameters;
         Block = block;
@@ -19,17 +18,19 @@ public class FunctionExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
-        gen.Write("function");
-        gen.Write(Name);
+        // (p: number)?: returnType => "";
         gen.Write("(");
         foreach (var param in Parameters)
         {
             param.Write(gen);
         }
         gen.Write(")");
-        gen.Write(":");
-        TsTypeGenerator.Generate(ReturnType);
+        if (ReturnType != null)
+        {
+            gen.Write(":");
+            gen.Write(TsTypeGenerator.Generate(ReturnType));
+        }
+        gen.Write("=>");
         Block.Write(gen);
-        // function aa(p) {}
     }
 }
