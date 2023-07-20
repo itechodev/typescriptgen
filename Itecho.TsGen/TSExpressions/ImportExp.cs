@@ -3,7 +3,7 @@ namespace Itecho.TsGen.TSExpressions;
 /// <summary>
 /// ES6 imports must be found at the top level of your module
 /// </summary>
-public class ImportExp : TsStandaloneExp
+public class ImportExp : TsExp
 {
     public string Library { get; }
     public NamedImport? Default { get; }

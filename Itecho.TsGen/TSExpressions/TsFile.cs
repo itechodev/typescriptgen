@@ -3,9 +3,9 @@ namespace Itecho.TsGen.TSExpressions;
 public class TsFile
 {
     // Ts file only allowed to have TsRootExp
-    public List<TsStandaloneExp> Body { get; } = new();
+    public List<TsExp> Body { get; } = new();
 
-    public void Add(TsStandaloneExp exp)
+    public void Add(TsExp exp)
     {
         Body.Add(exp);
     }

@@ -1,10 +1,10 @@
 namespace Itecho.TsGen.TSExpressions;
 
-public class NamedExportExp : TsStandaloneExp
+public class NamedExportExp : TsExp
 {
-    public TsStandaloneExp Export { get; }
+    public TsExp Export { get; }
 
-    public NamedExportExp(TsStandaloneExp export)
+    public NamedExportExp(TsExp export)
     {
         Export = export;
     }

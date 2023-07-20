@@ -1,10 +1,10 @@
 namespace Itecho.TsGen.TSExpressions;
 
-public class TsBlockExp : TsStandaloneExp
+public class TsBlockExp : TsExp
 {
-    public TsStandaloneExp[] Expressions { get; }
+    public TsExp[] Expressions { get; }
 
-    public TsBlockExp(TsStandaloneExp[] expressions)
+    public TsBlockExp(TsExp[] expressions)
     {
         Expressions = expressions;
     }

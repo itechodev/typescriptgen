@@ -1,6 +1,6 @@
 namespace Itecho.TsGen.TSExpressions;
 
-public class CommentExp : TsStandaloneExp
+public class CommentExp : TsExp
 {
     private bool IsJsDoc { get; }
     private string Comment { get; }

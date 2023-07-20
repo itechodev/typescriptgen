@@ -1,10 +1,10 @@
 namespace Itecho.TsGen.TSExpressions;
 
-public class DefaultExportExp : TsStandaloneExp
+public class DefaultExportExp : TsExp
 {
-    public TsExpBase Expression { get; }
+    public TsExp Expression { get; }
 
-    public DefaultExportExp(TsExpBase expression)
+    public DefaultExportExp(TsExp expression)
     {
         Expression = expression;
     }

@@ -1,6 +1,6 @@
 namespace Itecho.TsGen.TSExpressions;
 
-public class MultilineCommentExp : TsStandaloneExp
+public class MultilineCommentExp : TsExp
 {
     public string[] Lines { get; }
 

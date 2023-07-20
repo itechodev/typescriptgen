@@ -6,8 +6,10 @@ namespace Itecho.TsGen.TSExpressions;
 /// Expression that is nestable inside other expressions
 /// such as 
 /// </summary>
-public abstract class TsExp : TsExpBase
+public abstract class TsExp
 {
+    public abstract void Write(TsCodeGenerator gen);
+
 
     // factory methods to create expression
     public static CommentExp Comment(string comment, bool isJsDoc = false) => new(comment, isJsDoc);
@@ -16,8 +18,8 @@ public abstract class TsExp : TsExpBase
     public static ImportExp Import(string library, ImportExp.NamedImport @default, params ImportExp.NamedImport[] imports) =>
         new(library, @default, imports);
 
-    public static DefaultExportExp DefaultExport(TsExpBase exp) => new(exp);
-    public static NamedExportExp NamedExport(TsStandaloneExp exp) => new(exp);
+    public static DefaultExportExp DefaultExport(TsExp exp) => new(exp);
+    public static NamedExportExp NamedExport(TsExp exp) => new(exp);
     public static InterfaceExp Interface(TsInterface @interface) => new(@interface);
 
     public static TsEmptyLineExp EmptyLine() => new();
@@ -29,7 +31,6 @@ public abstract class TsExp : TsExpBase
     public static ConstExp Number(double value) => new(value);
     public static ConstExp Boolean(bool value) => new(value);
     public static ReturnExp Return(TsExp expression) => new(expression);
-    public static TsBlockExp Block(params TsStandaloneExp[] lines) => new(lines);
+    public static TsBlockExp Block(params TsExp[] lines) => new(lines);
     public static TsParameter Parameter(string name, TsType type) => new(name, type);
-    public static AssignExp
 }

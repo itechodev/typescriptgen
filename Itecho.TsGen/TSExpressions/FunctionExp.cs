@@ -2,7 +2,7 @@ using Itecho.TsGen.TsTypes;
 
 namespace Itecho.TsGen.TSExpressions;
 
-public class FunctionExp : TsStandaloneExp
+public class FunctionExp : TsExp
 {
     public string Name { get; }
     public TsType ReturnType { get; }

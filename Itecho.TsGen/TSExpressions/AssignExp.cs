@@ -2,7 +2,7 @@ using Itecho.TsGen.TsTypes;
 
 namespace Itecho.TsGen.TSExpressions;
 
-public class AssignExp : TsStandaloneExp
+public class AssignExp : TsExp
 {
     public TsExp Assign { get; }
     public TsExp Value { get; }

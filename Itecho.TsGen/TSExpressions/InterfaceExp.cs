@@ -2,7 +2,7 @@ using Itecho.TsGen.TsTypes;
 
 namespace Itecho.TsGen.TSExpressions;
 
-public class InterfaceExp : TsStandaloneExp
+public class InterfaceExp : TsExp
 {
     public TsInterface @Interface { get; }
 

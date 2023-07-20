@@ -1,6 +1,6 @@
 namespace Itecho.TsGen.TSExpressions;
 
-public class ReturnExp : TsStandaloneExp
+public class ReturnExp : TsExp
 {
     public TsExp Expression { get; }
     public ReturnExp(TsExp expression)
