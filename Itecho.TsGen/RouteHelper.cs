@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Itecho.TsGen.TSExpressions;
 
 namespace Itecho.TsGen;
 
@@ -48,7 +49,7 @@ public static class RouteHelper
     }
 
 
-    public static string BuildUrl
+    public static TsExp BuildUrl
     (
         ControllerInfo controller,
         ActionInfo action
@@ -59,9 +60,9 @@ public static class RouteHelper
         var interpolated = FormatRoutes(url.ToLower(), action);
 
         if (queryParams != null)
-            return "queryUrl(\"" + interpolated + "\", " + queryParams + ")";
+            return TsExp.FunctionCall("queryUrl", TsExp.String("interpolated"), TsExp.Variable("queryParams"));
 
-        return "\"" + interpolated + "\"";
+        return TsExp.String(interpolated);
     }
 
     // Takes in a route with segments, FarmController/{id}

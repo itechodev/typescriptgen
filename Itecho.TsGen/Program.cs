@@ -77,12 +77,12 @@ public static class Program
                 TsExp.Lambda(
                     TsPrimitive.String(),
                     g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
-                    TsExp.String(RouteHelper.BuildUrl(controller, g))
+                    RouteHelper.BuildUrl(controller, g)
                 )));
 
 
         tsFile.Add(TsExp.Assign(
-            TsExp.Variable("urls", VariableType.Const, null),
+            TsExp.VariableDef("urls", VariableType.Const, null),
             TsExp.Dictionary(urls)
         ));
 
