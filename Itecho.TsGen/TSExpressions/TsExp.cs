@@ -35,6 +35,7 @@ public abstract class TsExp
         new(returnType, parameters, block);
 
     public static StringExp String(string value) => new(value);
+    public static InterpolatedStringExp InterpolatedString(params InterpolatedSegment[] values) => new(values);
     public static ReturnExp Return(TsExp expression) => new(expression);
     public static TsBlockExp Block(params TsExp[] lines) => new(lines);
     public static TsParameter Parameter(string name, TsType type) => new(name, type);

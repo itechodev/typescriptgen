@@ -24,7 +24,7 @@ public class LambdaFunctionExp : TsExp
         gen.Write("(");
         if (Parameters.Any())
         {
-            gen.Write(Parameters.First().Name);
+            Parameters.First().Write(gen);
             foreach (var param in Parameters.Skip(1))
             {
                 gen.Write(", ");
