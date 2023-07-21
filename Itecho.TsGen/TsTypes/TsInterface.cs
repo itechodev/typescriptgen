@@ -67,8 +67,7 @@ public class TsInterface : TsType
                 ret.Add(@interface.Name);
                 return;
             case TsGenericReference genericReference:
-                ret.Add(genericReference.ReferencedType.Name);
-                // also add potential generic parameters
+                GetReferenceType(ret, genericReference.ReferencedType);
                 GetReferenceType(ret, genericReference.Parameters);
                 return;
             case TsEnum @enum:
@@ -89,7 +88,7 @@ public class TsInterface : TsType
                 return;
         }
     }
-    
+
     public List<string> GetReferencedTypes()
     {
         var list = new List<string>();

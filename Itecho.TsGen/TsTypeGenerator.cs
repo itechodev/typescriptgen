@@ -18,7 +18,7 @@ public static class TsTypeGenerator
             TsEnum @enum => @enum.Name,
             TsGeneric generic => generic.Name,
             TsGenericReference genericReference =>
-                $"{genericReference.ReferencedType.Name}<{string.Join(", ", genericReference.Parameters.Select(Generate))}>",
+                $"{TsTypeGenerator.Generate(genericReference.ReferencedType)}<{string.Join(", ", genericReference.Parameters.Select(Generate))}>",
             TsInterface @interface => @interface.Name,
             TsPrimitive primitive => GeneratePrimitive(primitive),
             TsVoid @void => "void",

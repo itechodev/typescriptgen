@@ -7,10 +7,10 @@ namespace Itecho.TsGen.TsTypes;
 /// </summary>
 public class TsGenericReference : TsType
 {
-    public TsInterface ReferencedType { get; }
+    public TsType ReferencedType { get; }
     public TsType[] Parameters { get; }
 
-    public TsGenericReference(TsInterface referencedType, TsType[] parameters)
+    public TsGenericReference(TsType referencedType, TsType[] parameters)
     {
         ReferencedType = referencedType;
         Parameters = parameters;

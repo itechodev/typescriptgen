@@ -28,7 +28,7 @@ public static class RouteHelper
         return name;
     }
 
-    private static string ActionMethod(ActionKind kind)
+    public static string ActionMethod(ActionKind kind)
     {
         return kind switch
         {
@@ -69,7 +69,7 @@ public static class RouteHelper
         var interpolated = FormatRoutes(url.ToLower(), action);
 
         if (queryParams != null)
-            return TsExp.FunctionCall("queryUrl", TsExp.String("interpolated"), TsExp.Variable("queryParams"));
+            return TsExp.FunctionCall(TsExp.Literal("queryUrl"), TsExp.String("interpolated"), TsExp.Variable("queryParams"));
 
         return TsExp.String(interpolated);
     }

@@ -79,8 +79,7 @@ public static class Program
                     g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
                     RouteHelper.BuildUrl(controller, g)
                 )));
-
-
+        
         tsFile.Add(TsExp.Assign(
             TsExp.VariableDef("urls", VariableType.Const, null),
             TsExp.Dictionary(urls)
@@ -93,7 +92,7 @@ public static class Program
 
         exportEntries.AddRange(controller.Actions.Select(action => new DictionaryEntry(
             TsExp.Literal(action.Name),
-            BuildControllerAction(action)))
+            BuildControllerAction(controller, action)))
         );
 
         tsFile.Add(TsExp.DefaultExport(TsExp.Dictionary(exportEntries)));
@@ -102,13 +101,29 @@ public static class Program
             controller.Name));
     }
 
-    private static TsExp BuildControllerAction(ActionInfo action)
+    private static TsExp BuildControllerAction(ControllerInfo controller, ActionInfo action)
     {
         //     upsert(request: AddressRequest): Promise<AxiosResponse> {
         //         return Axios.post("/api/address/upsert", request, defaultConfig);
         //     },
 
-        return TsExp.String("value");
+        var returnType = TsType.GenericReference(TsType.BuildIn("Promise"), action.ReturnType);
+
+        var paramList = action.Parameters.Select(p =>
+            new TsParameter(p.Name, p.Type));
+
+        return TsExp.FunctionDef(action.Name, returnType, paramList,
+            TsExp.Block(
+                TsExp.Return(
+                    TsExp.FunctionCall(
+                        TsExp.ObjectAccess(TsExp.Literal("Axios"), "post"),
+                        RouteHelper.BuildUrl(controller, action),
+                        TsExp.Literal("request"),
+                        TsExp.Literal("defaultConfig")
+                    )
+                )
+            )
+        );
     }
 
     private static void GenerateInterface(TsInterface @interface, string outputPath)

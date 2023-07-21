@@ -2,18 +2,18 @@ namespace Itecho.TsGen.TSExpressions;
 
 public class FunctionCallExp : TsExp
 {
-    public string Name { get; }
+    public TsExp Exp { get; }
     public IEnumerable<TsExp> Parameters { get; }
 
-    public FunctionCallExp(string name, IEnumerable<TsExp> parameters)
+    public FunctionCallExp(TsExp exp, IEnumerable<TsExp> parameters)
     {
-        Name = name;
+        Exp = exp;
         Parameters = parameters;
     }
 
     public override void Write(TsCodeGenerator gen)
     {
-        gen.Write(Name);
+        Exp.Write(gen);
         gen.Write("(");
         foreach (var param in Parameters)
         {

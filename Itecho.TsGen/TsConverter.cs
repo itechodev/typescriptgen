@@ -119,7 +119,7 @@ public static class TsConverter
         // convert IFormFile to File in TS, which is build in
         if (type == typeof(IFormFile))
         {
-            return new TsBuildInType(TsBuildInType.BuildInTypes.File);
+            return new TsBuildInType("File");
         }
 
         // Microsoft.AspNetCore.Mvc.FileContentResult
@@ -229,7 +229,8 @@ public static class TsConverter
             : null;
 
         var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
-            .Select(p => {
+            .Select(p =>
+            {
                 var json = p.GetCustomAttribute<JsonPropertyAttribute>();
                 var name = json?.PropertyName ?? p.Name;
                 return new TsInterface.TsInterfaceMember(name, Convert(p.PropertyType, NullableHelper.IsNullable(p)));
