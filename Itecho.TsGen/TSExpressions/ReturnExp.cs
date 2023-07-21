@@ -10,7 +10,8 @@ public class ReturnExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
-        gen.WriteLine($"return ");
+        gen.NewLine();
+        gen.Write($"return ");
         Expression.Write(gen);
     }
 }

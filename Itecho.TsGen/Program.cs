@@ -75,7 +75,7 @@ public static class Program
             .Where(r => r.Kind == ActionKind.Get)
             .Select(g => new DictionaryEntry(TsExp.String(g.Name),
                 TsExp.Lambda(
-                    TsPrimitive.String(),
+                    null,
                     g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
                     RouteHelper.BuildUrl(controller, g)
                 )));

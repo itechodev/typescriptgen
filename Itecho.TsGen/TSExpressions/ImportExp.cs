@@ -42,7 +42,7 @@ public class ImportExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
-        gen.WriteLine(FormatHelper.Spaces(
+        gen.Write(FormatHelper.Spaces(
             "import",
             @Default?.Generate(),
             string.Join(", ", Imports.Select(i => i.Generate())),

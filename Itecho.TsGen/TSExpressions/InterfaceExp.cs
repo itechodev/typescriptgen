@@ -21,14 +21,14 @@ public class InterfaceExp : TsExp
 
         if (@Interface.Extends != null)
         {
-            gen.Write($" extends {@Interface.Extends.Name}");
+            gen.Write($"extends {@Interface.Extends.Name}", true);
         }
 
-        gen.Block(() =>
-        {
+        gen.Block(() => {
             foreach (var member in @Interface.Members)
             {
-                gen.WriteLine($"{FormatHelper.CamelCase(member.Name)}: {TsTypeGenerator.Generate(member.Type)}" + (member == @Interface.Members.Last() ? string.Empty : ","));
+                gen.Write($"{FormatHelper.CamelCase(member.Name)}: {TsTypeGenerator.Generate(member.Type)};");
+                gen.NewLine();
             }
         });
     }

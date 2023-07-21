@@ -4,6 +4,6 @@ public class TsEmptyLineExp : TsExp
 {
     public override void Write(TsCodeGenerator gen)
     {
-        gen.WriteLine();
+        gen.NewLine();
     }
 }

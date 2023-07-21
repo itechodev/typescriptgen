@@ -12,12 +12,15 @@ public class MultilineCommentExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
-        gen.WriteLine("/**");
+        gen.Write("/**");
         foreach (var line in Lines)
         {
-            gen.WriteLine($" * {line}");
+            gen.NewLine();
+            gen.Write($" * {line}");
         }
 
-        gen.WriteLine(" */");
+        gen.NewLine();
+        gen.Write(" */");
+        gen.NewLine();
     }
 }
