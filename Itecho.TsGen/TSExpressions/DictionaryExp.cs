@@ -23,13 +23,14 @@ public class DictionaryExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
-        gen.Write("{");
-        foreach (var entry in Entries)
-        {
-            entry.Key.Write(gen);
-            gen.Write(":");
-            entry.Value.Write(gen);
-        }
-        gen.Write("}");
+        gen.Block(() => {
+            foreach (var entry in Entries)
+            {
+                entry.Key.Write(gen);
+                gen.Write(": ");
+                entry.Value.Write(gen);
+                gen.NewLine();
+            }
+        });
     }
 }

@@ -19,11 +19,11 @@ public class VariableDefExp : TsExp
     public override void Write(TsCodeGenerator gen)
     {
         gen.Write(VariableTypeString(Type));
-        gen.Write(Name);
+        gen.Write(Name, true);
         if (Signature != null)
         {
             gen.Write(":");
-            gen.Write(TsTypeGenerator.Generate(Signature));
+            gen.Write(TsTypeGenerator.Generate(Signature), true);
         }
     }
 

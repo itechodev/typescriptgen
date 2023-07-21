@@ -27,10 +27,10 @@ public class LambdaFunctionExp : TsExp
         gen.Write(")");
         if (ReturnType != null)
         {
-            gen.Write(":");
+            gen.Write(": ");
             gen.Write(TsTypeGenerator.Generate(ReturnType));
         }
-        gen.Write("=>");
+        gen.Write(" => ");
         Block.Write(gen);
     }
 }

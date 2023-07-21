@@ -35,4 +35,6 @@ public abstract class TsExp
     public static VariableDefExp VariableDef(string name, VariableType type, TsType? signature) => new(name, type, signature);
     public static VariableExp Variable(string name) => new(name);
     public static AssignExp Assign(TsExp name, TsExp value) => new(name, value);
+    public static LiteralExp Literal(string value) => new(value);
+
 }

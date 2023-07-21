@@ -73,7 +73,7 @@ public static class Program
         var urls = controller
             .Actions
             .Where(r => r.Kind == ActionKind.Get)
-            .Select(g => new DictionaryEntry(TsExp.String(g.Name),
+            .Select(g => new DictionaryEntry(TsExp.Literal(g.Name),
                 TsExp.Lambda(
                     null,
                     g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
