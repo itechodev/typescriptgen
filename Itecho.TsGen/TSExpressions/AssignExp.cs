@@ -16,5 +16,6 @@ public class AssignExp : TsExp
         Assign.Write(gen);
         gen.Write(" = ");
         Value.Write(gen);
+        gen.NewLine();
     }
 }
