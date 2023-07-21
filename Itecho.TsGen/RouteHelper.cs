@@ -1,23 +1,36 @@
 using System.Text.RegularExpressions;
 using Itecho.TsGen.TSExpressions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Itecho.TsGen;
 
 public static class RouteHelper
 {
-    private static string FormatQueryParams(List<ActionParameter> parameters)
+    /// <summary>
+    /// build the url for the action
+    /// influenced by FromRoute and FromQuery parameters
+    /// </summary>
+    /// <param name="controller"></param>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public static TsExp BuildUrl(ControllerInfo controller, ActionInfo action)
     {
-        var q = parameters.Where(p => p.Kind == ActionParameterKind.Query).ToList();
-        if (!q.Any())
-            return null;
+        // (value: number, name: string | null) => buildUrl('/home/isOdd'. {value, name});
+        // (value: number, route: string) => buildUrl(`/home/isOdd/${route}`. {value, name});
+        var url = GetUrl(controller, action);
 
-        // Check is params in [FromBody] is a Object, but not an array
-        // if (q.Count == 1 && Type.GetTypeCode(q[0].Type) == TypeCode.Object && !q[0].Type.IsArray())
-        // {
-        //     return q[0].Name;
-        // }
-        //     
-        return "{" + string.Join(", ", q.Select(a => a.Name)) + "}";
+        // first handle the route parameters if any.
+        // convert to interpolated string or normal string
+        var urlExp = FormatRoutes(url.ToLower(), action);
+
+        // then we handle the query parameters and use the buildUrl function
+        var q = action.Parameters
+            .Where(p => p.Kind == ActionParameterKind.Query)
+            .Select(p => new DictionaryEntry(TsExp.Literal(p.Name)));
+
+        return !q.Any()
+            ? urlExp
+            : TsExp.FunctionCall(TsExp.Literal("buildUrl"), TsExp.Dictionary(q));
     }
 
     private static string FormatControllerName(string name)
@@ -32,7 +45,9 @@ public static class RouteHelper
     {
         return kind switch
         {
-            ActionKind.Post => "post", ActionKind.Get => "get", ActionKind.Patch => "patch", ActionKind.Delete => "delete", ActionKind.Put => "put", _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+            ActionKind.Post => "post", ActionKind.Get => "get", ActionKind.Patch => "patch",
+            ActionKind.Delete => "delete", ActionKind.Put => "put",
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
     }
 
@@ -58,25 +73,9 @@ public static class RouteHelper
     }
 
 
-    public static TsExp BuildUrl
-    (
-        ControllerInfo controller,
-        ActionInfo action
-    )
-    {
-        var queryParams = FormatQueryParams(action.Parameters);
-        var url = GetUrl(controller, action);
-        var interpolated = FormatRoutes(url.ToLower(), action);
-
-        if (queryParams != null)
-            return TsExp.FunctionCall(TsExp.Literal("queryUrl"), TsExp.String("interpolated"), TsExp.Variable("queryParams"));
-
-        return TsExp.String(interpolated);
-    }
-
     // Takes in a route with segments, FarmController/{id}
     // And converts to a JS interpolated string
-    private static string FormatRoutes(string url, ActionInfo action)
+    private static TsExp FormatRoutes(string url, ActionInfo action)
     {
         // extract url segments {}
         var routes = action
@@ -84,8 +83,9 @@ public static class RouteHelper
             .Where(p => p.Kind == ActionParameterKind.Route)
             .ToArray();
 
+        // there are no routes defined, return the url as is
         if (routes.Length == 0)
-            return url;
+            return TsExp.String(url);
 
         // extract all {.} pairs from the URL
         // then replace it with route parameter
@@ -97,17 +97,23 @@ public static class RouteHelper
         // fallback to construct with /
         if (matches.Count != routes.Length)
         {
-            throw new Exception($"Could not build URL. There are {routes.Length} parameter routes defined with {matches.Count} url segment in action `{action.Name}`.\n Url provided: {url} with route paramters {string.Join(" ", routes.Select(r => r.Name))}");
+            throw new Exception(
+                $"Could not build URL. There are {routes.Length} parameter routes defined with {matches.Count} url segment in action `{action.Name}`.\n Url provided: {url} with route paramters {string.Join(" ", routes.Select(r => r.Name))}");
         }
 
-        var newUrl = "";
+        var segments = new List<InterpolatedSegment>();
         var prev = 0;
         foreach (Match match in matches)
         {
-            newUrl += url.Substring(prev, match.Index) + "$" + url.Substring(match.Index, match.Length);
+            if (match.Index > prev)
+            {
+                segments.Add(InterpolatedStringExp.String(url.Substring(prev, match.Index)));
+            }
+
+            segments.Add(InterpolatedStringExp.Expression(TsExp.Literal(url.Substring(match.Index, match.Length))));
             prev = match.Index + match.Length;
         }
 
-        return newUrl;
+        return TsExp.InterpolatedString(segments.ToArray());
     }
 }
