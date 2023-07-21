@@ -15,10 +15,16 @@ public class FunctionCallExp : TsExp
     {
         Exp.Write(gen);
         gen.Write("(");
-        foreach (var param in Parameters)
+        if (Parameters.Any())
         {
-            param.Write(gen);
+            Parameters.First().Write(gen);
+            foreach (var param in Parameters.Skip(1))
+            {
+                gen.Write(", ");
+                param.Write(gen);
+            }
         }
+
         gen.Write(")");
     }
 }

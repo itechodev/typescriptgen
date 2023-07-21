@@ -11,5 +11,12 @@ public class TsBlockExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
+        gen.Block(() =>
+        {
+            foreach (var exp in Expressions)
+            {
+                exp.Write(gen);
+            }
+        });
     }
 }

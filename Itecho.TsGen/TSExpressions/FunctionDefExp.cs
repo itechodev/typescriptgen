@@ -19,17 +19,23 @@ public class FunctionDefExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
-        gen.Write("function");
+        gen.Write("function ");
         gen.Write(Name);
         gen.Write("(");
-        foreach (var param in Parameters)
+
+        if (Parameters.Any())
         {
-            param.Write(gen);
+            Parameters.First().Write(gen);
+            foreach (var param in Parameters.Skip(1))
+            {
+                gen.Write(", ");
+                param.Write(gen);
+            }
         }
+
         gen.Write(")");
         gen.Write(":");
-        TsTypeGenerator.Generate(ReturnType);
+        gen.Write(TsTypeGenerator.Generate(ReturnType));
         Block.Write(gen);
-        // function aa(p) {}
     }
 }
