@@ -74,11 +74,7 @@ public static class Program
             .Actions
             .Where(r => r.Kind == ActionKind.Get)
             .Select(g => new DictionaryEntry(TsExp.Literal(g.Name),
-                TsExp.Lambda(
-                    null,
-                    g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
-                    RouteHelper.BuildUrl(controller, g)
-                )));
+                RouteHelper.BuildUrl(controller, g)));
 
         tsFile.Add(TsExp.Assign(
             TsExp.VariableDef("urls", VariableType.Const, null),
@@ -112,14 +108,24 @@ public static class Program
         var paramList = action.Parameters.Select(p =>
             new TsParameter(p.Name, p.Type));
 
+        var urlsParams = action.Parameters
+            .Where(a => a.Kind is (ActionParameterKind.Query or ActionParameterKind.Route))
+            .Select(p => TsExp.Literal(p.Name))
+            .ToArray();
+
+
         return TsExp.Lambda(returnType, paramList,
             TsExp.Block(
                 TsExp.Return(
                     TsExp.FunctionCall(
-                        TsExp.ObjectAccess(TsExp.Literal("Axios"), RouteHelper.ActionMethod(action.Kind)),
-                        RouteHelper.BuildUrl(controller, action),
-                        TsExp.Literal("request"),
-                        TsExp.Literal("defaultConfig")
+                        TsExp.ObjectAccess(TsExp.Literal("http"),
+                            RouteHelper.ActionMethod(action.Kind)
+                        ),
+                        // urls.name(param1, param2)
+                        TsExp.FunctionCall(
+                            TsExp.ObjectAccess(TsExp.Literal("urls"), action.Name),
+                            urlsParams
+                        )
                     )
                 )
             )

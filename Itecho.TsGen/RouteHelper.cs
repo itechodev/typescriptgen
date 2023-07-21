@@ -28,9 +28,17 @@ public static class RouteHelper
             .Where(p => p.Kind == ActionParameterKind.Query)
             .Select(p => new DictionaryEntry(TsExp.Literal(p.Name)));
 
-        return !q.Any()
+        var buildUrl = !q.Any()
             ? urlExp
-            : TsExp.FunctionCall(TsExp.Literal("buildUrl"), TsExp.Dictionary(q));
+            : TsExp.FunctionCall(TsExp.Literal("buildUrl"), urlExp, TsExp.Dictionary(q));
+
+        return TsExp.Lambda(
+            null,
+            action.Parameters
+                .Where(p => p.Kind is ActionParameterKind.Route or ActionParameterKind.Query)
+                .Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
+            buildUrl
+        );
     }
 
     private static string FormatControllerName(string name)
