@@ -45,7 +45,6 @@ public class TsCodeGenerator
         if (!_startOfNewLine)
             NewLine();
         Write("}");
-        NewLine();
     }
 
 

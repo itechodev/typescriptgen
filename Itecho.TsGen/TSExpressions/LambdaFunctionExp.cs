@@ -39,7 +39,7 @@ public class LambdaFunctionExp : TsExp
             gen.Write(TsTypeGenerator.Generate(ReturnType));
         }
 
-        gen.Write(" => ");
+        gen.Write(" =>");
         Block.Write(gen);
     }
 }
