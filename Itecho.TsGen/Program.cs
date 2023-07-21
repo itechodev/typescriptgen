@@ -27,8 +27,8 @@ public static class Program
             return;
         }
 
-        var assemblyPath = args[0];
-        var outputPath = args[1];
+        var assemblyPath = Path.GetFullPath(args[0]);
+        var outputPath = Path.GetFullPath(args[1]);
         Console.WriteLine("Inspecting assembly: " + assemblyPath);
         Console.WriteLine("Output path: " + outputPath);
 
@@ -79,7 +79,7 @@ public static class Program
                     g.Parameters.Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
                     RouteHelper.BuildUrl(controller, g)
                 )));
-        
+
         tsFile.Add(TsExp.Assign(
             TsExp.VariableDef("urls", VariableType.Const, null),
             TsExp.Dictionary(urls)
@@ -112,11 +112,11 @@ public static class Program
         var paramList = action.Parameters.Select(p =>
             new TsParameter(p.Name, p.Type));
 
-        return TsExp.FunctionDef(action.Name, returnType, paramList,
+        return TsExp.Lambda(returnType, paramList,
             TsExp.Block(
                 TsExp.Return(
                     TsExp.FunctionCall(
-                        TsExp.ObjectAccess(TsExp.Literal("Axios"), "post"),
+                        TsExp.ObjectAccess(TsExp.Literal("Axios"), RouteHelper.ActionMethod(action.Kind)),
                         RouteHelper.BuildUrl(controller, action),
                         TsExp.Literal("request"),
                         TsExp.Literal("defaultConfig")
