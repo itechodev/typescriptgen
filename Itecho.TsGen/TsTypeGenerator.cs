@@ -9,7 +9,7 @@ public static class TsTypeGenerator
         return type switch
         {
             TsArray array => $"{Generate(array.ElementType)}[]",
-            TsBuildInType => "File",
+            TsBuildInType buildInType => buildInType.BuildInType,
             TsIntersection intersection => string.Join(" & ", intersection.Types.Select(Generate)),
             TsTuple tuple => $"[{string.Join(", ", tuple.Types.Select(Generate))}]",
             TsUnion union => string.Join(" | ", union.Types.Select(Generate)),
@@ -18,7 +18,7 @@ public static class TsTypeGenerator
             TsEnum @enum => @enum.Name,
             TsGeneric generic => generic.Name,
             TsGenericReference genericReference =>
-                $"{TsTypeGenerator.Generate(genericReference.ReferencedType)}<{string.Join(", ", genericReference.Parameters.Select(Generate))}>",
+                $"{Generate(genericReference.ReferencedType)}<{string.Join(", ", genericReference.Parameters.Select(Generate))}>",
             TsInterface @interface => @interface.Name,
             TsPrimitive primitive => GeneratePrimitive(primitive),
             TsVoid @void => "void",

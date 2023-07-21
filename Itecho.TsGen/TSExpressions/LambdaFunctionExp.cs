@@ -5,7 +5,9 @@ namespace Itecho.TsGen.TSExpressions;
 public class LambdaFunctionExp : TsExp
 {
     public TsType? ReturnType { get; }
+
     public IEnumerable<TsParameter> Parameters { get; }
+
     // block or implicit return
     public TsExp Block { get; }
 
@@ -20,16 +22,23 @@ public class LambdaFunctionExp : TsExp
     {
         // (p: number)?: returnType => "";
         gen.Write("(");
-        foreach (var param in Parameters)
+        if (Parameters.Any())
         {
-            param.Write(gen);
+            gen.Write(Parameters.First().Name);
+            foreach (var param in Parameters.Skip(1))
+            {
+                gen.Write(", ");
+                param.Write(gen);
+            }
         }
+
         gen.Write(")");
         if (ReturnType != null)
         {
             gen.Write(": ");
             gen.Write(TsTypeGenerator.Generate(ReturnType));
         }
+
         gen.Write(" => ");
         Block.Write(gen);
     }
