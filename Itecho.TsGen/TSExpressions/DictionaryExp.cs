@@ -5,6 +5,12 @@ public class DictionaryEntry
     public TsExp Key { get; }
     public TsExp Value { get; }
 
+    public DictionaryEntry(TsExp keyAndValue)
+    {
+        Key = keyAndValue;
+        Value = keyAndValue;
+    }
+
     public DictionaryEntry(TsExp key, TsExp value)
     {
         Key = key;
@@ -27,8 +33,12 @@ public class DictionaryExp : TsExp
             foreach (var entry in Entries)
             {
                 entry.Key.Write(gen);
-                gen.Write(": ");
-                entry.Value.Write(gen);
+                if (entry.Key != entry.Value)
+                {
+                    gen.Write(": ");
+                    entry.Value.Write(gen);
+                }
+                gen.Write(",");
                 gen.NewLine();
             }
         });

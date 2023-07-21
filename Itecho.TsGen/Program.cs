@@ -86,8 +86,29 @@ public static class Program
             TsExp.Dictionary(urls)
         ));
 
+        var exportEntries = new List<DictionaryEntry>
+        {
+            new(TsExp.Literal("urls"))
+        };
+
+        exportEntries.AddRange(controller.Actions.Select(action => new DictionaryEntry(
+            TsExp.Literal(action.Name),
+            BuildControllerAction(action)))
+        );
+
+        tsFile.Add(TsExp.DefaultExport(TsExp.Dictionary(exportEntries)));
+
         tsFile.WriteToFile(Path.Combine(outputPath,
             controller.Name));
+    }
+
+    private static TsExp BuildControllerAction(ActionInfo action)
+    {
+        //     upsert(request: AddressRequest): Promise<AxiosResponse> {
+        //         return Axios.post("/api/address/upsert", request, defaultConfig);
+        //     },
+
+        return TsExp.String("value");
     }
 
     private static void GenerateInterface(TsInterface @interface, string outputPath)

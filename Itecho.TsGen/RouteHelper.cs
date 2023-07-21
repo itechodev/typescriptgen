@@ -28,6 +28,15 @@ public static class RouteHelper
         return name;
     }
 
+    private static string ActionMethod(ActionKind kind)
+    {
+        return kind switch
+        {
+            ActionKind.Post => "post", ActionKind.Get => "get", ActionKind.Patch => "patch", ActionKind.Delete => "delete", ActionKind.Put => "put", _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+        };
+    }
+
+
     private static string GetUrl(ControllerInfo controller, ActionInfo action)
     {
         if (!string.IsNullOrEmpty(action.RouteTemplate))
