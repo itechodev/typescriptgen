@@ -25,11 +25,7 @@ public class ImportExp : TsExp
 
         public string Generate()
         {
-            var str = IsTyped
-                ? "type " + Name
-                : Name;
-
-            return $"{str}";
+            return (IsTyped ? "type " : "") + Name;
         }
     }
 

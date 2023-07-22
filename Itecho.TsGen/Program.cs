@@ -73,36 +73,15 @@ public static class Program
         // import all references for this controller
         foreach (var import in controller.GetReferencedTypes())
         {
-            tsFile.Add(TsExp.Import($"./{import}", new ImportExp.NamedImport(import, true)));
+            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
             tsFile.Add(TsExp.EmptyLine());
         }
 
         tsFile.Add(TsExp.EmptyLine());
-        // export only for get methods
-        // const urls = {
-        //     index(p1: number, p2: number): string {
-        //         return "/api/address/index";
-        //     }
-        // }
-        // var urls = controller
-        //     .Actions
-        //     .Where(r => r.Kind == ActionKind.Get)
-        //     .Select(g => new DictionaryEntry(TsExp.Literal(g.Name),
-        //         RouteHelper.BuildUrl(controller, g)));
-        //
-        // tsFile.Add(TsExp.Assign(
-        //     TsExp.VariableDef("urls", VariableType.Const, null),
-        //     TsExp.Dictionary(urls)
-        // ));
 
-        var exportEntries = new List<DictionaryEntry>
-        {
-            // new(TsExp.Literal("urls"))
-        };
-
-        exportEntries.AddRange(controller.Actions.Select(action => new DictionaryEntry(
+        var exportEntries = controller.Actions.Select(action => new DictionaryEntry(
             TsExp.Literal(action.Name),
-            BuildControllerAction(controller, action)))
+            BuildControllerAction(controller, action))
         );
 
         tsFile.Add(TsExp.DefaultExport(TsExp.Dictionary(exportEntries)));
@@ -178,7 +157,7 @@ public static class Program
         // import all interfaces referenced by this interface
         foreach (var import in @interface.GetReferencedTypes())
         {
-            tsFile.Add(TsExp.Import($"./{import}", new ImportExp.NamedImport(import, true)));
+            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
         }
 
         tsFile.Add(TsExp.EmptyLine());
