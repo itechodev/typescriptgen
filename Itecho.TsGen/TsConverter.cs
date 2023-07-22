@@ -122,12 +122,6 @@ public static class TsConverter
             return new TsBuildInType("File");
         }
 
-        // Microsoft.AspNetCore.Mvc.FileContentResult
-        if (type.Assembly.FullName?.StartsWith("Microsoft.AspNetCore.Mvc") ?? false)
-        {
-            return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
-        }
-
         // First check dictionary then array because Dictionary inherits from IEnumerable
         if (type.IsDictionary())
         {
@@ -177,6 +171,7 @@ public static class TsConverter
         // we don't need to convert ActionResult or Task
         var def = type.GetGenericTypeDefinition();
 
+
         if (def.IsTuple())
         {
             return new TsTuple(type.GenericTypeArguments.Select(g => Convert(g)).ToArray());
@@ -188,6 +183,12 @@ public static class TsConverter
                 return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
             return Convert(type.GenericTypeArguments[0]);
+        }
+
+        // Any class that implements ActionResult FileContentResult
+        if (typeof(ActionResult).IsAssignableFrom(def))
+        {
+            return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
         }
 
         if (def == typeof(Nullable<>))
