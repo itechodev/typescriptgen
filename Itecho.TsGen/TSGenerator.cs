@@ -69,15 +69,14 @@ public static class TSGenerator
             clientParams.Add(TsExp.Dictionary(options));
         }
 
-        return TsExp.Lambda(null, paramList, TsExp.Block(
+        return TsExp.Lambda(null, paramList,
             TsExp.Return(
                 TsExp.FunctionCall(TsExp.Literal("makeRequest"), new List<TsType>
                     {
                         action.ReturnType
                     }, clientParams.ToArray()
                 )
-            )
-        ));
+            ));
     }
     private static void AddHeaders(List<DictionaryEntry> options, ActionInfo action)
     {

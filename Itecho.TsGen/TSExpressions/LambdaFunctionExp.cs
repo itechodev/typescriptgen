@@ -40,6 +40,11 @@ public class LambdaFunctionExp : TsExp
         }
 
         gen.Write(" => ");
-        Block.Write(gen);
+        // implicit return 
+        if (Block is ReturnExp ret)
+        {
+            ret.Expression.Write(gen);
+        } 
+        else Block.Write(gen);
     }
 }
