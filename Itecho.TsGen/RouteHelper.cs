@@ -26,10 +26,8 @@ public static class RouteHelper
 
     private static string FormatControllerName(string name)
     {
-        if (name.EndsWith("controller", StringComparison.OrdinalIgnoreCase))
-            return name.Substring(0, name.Length - 10);
+        return "/" + (name.EndsWith("controller", StringComparison.OrdinalIgnoreCase) ? name[..^10] : name);
 
-        return name;
     }
 
     public static string ActionMethod(ActionKind kind)
@@ -58,7 +56,7 @@ public static class RouteHelper
         }
 
         // fallback to the default route controller/action
-        return "/api/" + FormatControllerName(controller.Name) + "/" + action.Name;
+        return FormatControllerName(controller.Name) + "/" + action.Name;
     }
 
 
