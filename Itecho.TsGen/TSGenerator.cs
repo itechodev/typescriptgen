@@ -1,0 +1,141 @@
+using Itecho.TsGen.TSExpressions;
+using Itecho.TsGen.TsTypes;
+
+namespace Itecho.TsGen;
+
+public static class TSGenerator
+{
+
+    public static void GenerateController(ControllerInfo controller, string outputPath)
+    {
+        var tsFile = new TsFile();
+        tsFile.Add(TsExp.Comment("eslint-disable", true));
+        tsFile.Add(VersionInfo.GenerationNotice);
+
+        tsFile.Add(TsExp.EmptyLine());
+        // import the user customisable http client 
+        tsFile.Add(TsExp.Import("./httpClient", new ImportExp.NamedImport("httpClient", false)));
+        tsFile.Add(TsExp.EmptyLine());
+
+        // import all references for this controller
+        foreach (var import in controller.GetReferencedTypes())
+        {
+            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
+            tsFile.Add(TsExp.EmptyLine());
+        }
+
+        tsFile.Add(TsExp.EmptyLine());
+
+        var exportEntries = controller.Actions.Select(action => new DictionaryEntry(
+            TsExp.Literal(action.Name),
+            BuildControllerAction(controller, action))
+        );
+
+        tsFile.Add(TsExp.DefaultExport(TsExp.Dictionary(exportEntries)));
+
+        tsFile.WriteToFile(Path.Combine(outputPath,
+            FormatHelper.CamelCase(controller.Name)));
+    }
+
+    private static TsExp BuildControllerAction(ControllerInfo controller, ActionInfo action)
+    {
+        /*
+         httpClient<T>(url: string, options?: HttpOptions): Promise<T>
+         export interface HttpOptions {
+            method?: 'get' | 'post' | 'put' | 'patch' | 'delete';
+            body?: object | FormData;
+            queryParams?: Record<string, unknown>;
+            headers?: Record<string, unknown>;
+        }
+        */
+
+        var returnType = TsType.GenericReference(TsType.BuildIn("Promise"), action.ReturnType);
+
+        var paramList = action.Parameters.Select(p =>
+            new TsParameter(p.Name, p.Type));
+
+        var options = new List<DictionaryEntry>();
+        AddMethod(options, action.Kind);
+        AddBody(options, action);
+        AddQueryParams(options, action);
+        AddHeaders(options, action);
+
+        var clientParams = new List<TsExp>()
+        {
+            RouteHelper.BuildUrl(controller, action)
+        };
+        if (options.Any())
+        {
+            clientParams.Add(TsExp.Dictionary(options));
+        }
+
+        return TsExp.Lambda(returnType, paramList, TsExp.Block(
+            TsExp.Return(
+                TsExp.FunctionCall(TsExp.Literal("httpClient"), clientParams.ToArray()
+                )
+            )
+        ));
+    }
+    private static void AddHeaders(List<DictionaryEntry> options, ActionInfo action)
+    {
+        // handle [FromHeader}
+        var headerParams = action.Parameters
+            .Where(p => p.Kind == ActionParameterKind.Header)
+            .Select(g => new DictionaryEntry(TsExp.Literal(g.Name)))
+            .ToList();
+
+        if (headerParams.Any())
+        {
+            options.Add(new DictionaryEntry(TsExp.Literal("headers"), TsExp.Dictionary(headerParams)));
+        }
+    }
+    private static void AddQueryParams(List<DictionaryEntry> options, ActionInfo action)
+    {
+        // handle [FromQuery}
+        var queryParams = action.Parameters
+            .Where(p => p.Kind == ActionParameterKind.Query)
+            .Select(g => new DictionaryEntry(TsExp.Literal(g.Name)))
+            .ToList();
+        if (queryParams.Any())
+        {
+            options.Add(new DictionaryEntry(TsExp.Literal("queryParams"), TsExp.Dictionary(queryParams)));
+        }
+    }
+    private static void AddBody(List<DictionaryEntry> options, ActionInfo action)
+    {
+        // handle [FromBody] and [FromForm]
+        var bodyParam = action.Parameters.SingleOrDefault(p => p.Kind is ActionParameterKind.Body or ActionParameterKind.Form);
+        if (bodyParam != null)
+        {
+            options.Add(new DictionaryEntry(TsExp.Literal("body"), TsExp.Literal(bodyParam.Name)));
+        }
+    }
+
+    private static void AddMethod(List<DictionaryEntry> options, ActionKind kind)
+    {
+        // { method: 'get'} is the default
+        // for anything else we need to explicit pass it
+        if (kind != ActionKind.Get)
+        {
+            options.Add(new DictionaryEntry(TsExp.Literal("method"), TsExp.String(kind.ToString().ToLower())));
+        }
+
+    }
+
+    public static void GenerateInterface(TsInterface @interface, string outputPath)
+    {
+        var tsFile = new TsFile();
+        tsFile.Add(VersionInfo.GenerationNotice);
+
+        // import all interfaces referenced by this interface
+        foreach (var import in @interface.GetReferencedTypes())
+        {
+            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
+        }
+
+        tsFile.Add(TsExp.EmptyLine());
+        tsFile.Add(TsExp.DefaultExport(TsExp.Interface(@interface)));
+
+        tsFile.WriteToFile(Path.Combine(outputPath, FormatHelper.CamelCase(@interface.Name)));
+    }
+}
