@@ -2,7 +2,7 @@ using Itecho.TsGen.TSExpressions;
 
 namespace Itecho.TsGen;
 
-public static class HttpOptions
+public static class RequestOptions
 {
     public static TsFile Generate()
     {
@@ -11,7 +11,7 @@ public static class HttpOptions
         file.Add(VersionInfo.GenerationNotice);
 
         file.Add(TsExp.Literal(@"
-export interface HttpOptions {
+export interface RequestOptions {
     method?: 'get' | 'post' | 'put' | 'patch' | 'delete';
     body?: object | FormData;
     queryParams?: Record<string, unknown>;

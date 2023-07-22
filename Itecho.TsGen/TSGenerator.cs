@@ -14,7 +14,7 @@ public static class TSGenerator
 
         tsFile.Add(TsExp.EmptyLine());
         // import the user customisable http client 
-        tsFile.Add(TsExp.Import("./httpClient", new ImportExp.NamedImport("httpClient", false)));
+        tsFile.Add(TsExp.Import("./makeRequest", new ImportExp.NamedImport("makeRequest", false)));
         tsFile.Add(TsExp.EmptyLine());
 
         // import all references for this controller
@@ -49,7 +49,7 @@ public static class TSGenerator
         }
         */
 
-        var returnType = TsType.GenericReference(TsType.BuildIn("Promise"), action.ReturnType);
+        // var returnType = TsType.GenericReference(TsType.BuildIn("Promise"), action.ReturnType);
 
         var paramList = action.Parameters.Select(p =>
             new TsParameter(p.Name, p.Type));
@@ -69,9 +69,12 @@ public static class TSGenerator
             clientParams.Add(TsExp.Dictionary(options));
         }
 
-        return TsExp.Lambda(returnType, paramList, TsExp.Block(
+        return TsExp.Lambda(null, paramList, TsExp.Block(
             TsExp.Return(
-                TsExp.FunctionCall(TsExp.Literal("httpClient"), clientParams.ToArray()
+                TsExp.FunctionCall(TsExp.Literal("makeRequest"), new List<TsType>
+                    {
+                        action.ReturnType
+                    }, clientParams.ToArray()
                 )
             )
         ));

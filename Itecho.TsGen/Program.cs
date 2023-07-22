@@ -47,12 +47,12 @@ public static class Program
         }
 
         // generate the general http handler
-        HttpOptions.Generate().WriteToFile(Path.Combine(outputPath, "httpOptions"));
+        RequestOptions.Generate().WriteToFile(Path.Combine(outputPath, "requestOptions"));
         // and the http concrete handler for the user to change
-        var httpClientPath = Path.Combine(outputPath, "httpClient");
+        var httpClientPath = Path.Combine(outputPath, "makeRequest");
         if (!File.Exists(httpClientPath))
         {
-            HttpClientFile.Generate().WriteToFile(httpClientPath);
+            HttpMakeRequestFile.Generate().WriteToFile(httpClientPath);
         }
         Console.WriteLine("Done");
     }

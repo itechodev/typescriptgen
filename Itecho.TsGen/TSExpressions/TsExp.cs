@@ -29,7 +29,7 @@ public abstract class TsExp
     public static FunctionDefExp FunctionDef(string name, TsType returnType, IEnumerable<TsParameter> parameters,
         TsBlockExp block) => new(name, returnType, parameters, block);
 
-    public static FunctionCallExp FunctionCall(TsExp exp, params TsExp[] parameters) => new(exp, parameters);
+    public static FunctionCallExp FunctionCall(TsExp exp, IEnumerable<TsType>? generics, params TsExp[] parameters) => new(exp, generics, parameters);
 
     public static LambdaFunctionExp Lambda(TsType? returnType, IEnumerable<TsParameter> parameters, TsExp block) =>
         new(returnType, parameters, block);
