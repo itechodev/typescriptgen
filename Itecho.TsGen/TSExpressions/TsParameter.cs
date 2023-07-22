@@ -15,7 +15,7 @@ public class TsParameter
     public void Write(TsCodeGenerator gen)
     {
         gen.Write(Name);
-        gen.Write(":");
+        gen.Write(": ");
         gen.Write(TsTypeGenerator.Generate(Type));
     }
 }

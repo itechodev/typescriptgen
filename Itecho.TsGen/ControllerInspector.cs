@@ -98,7 +98,7 @@ public static class ControllerInspector
             return null;
 
         return new ActionParameter(param.Name ?? "", GetKind(param), param.DefaultValue,
-            TsConverter.Convert(param.ParameterType));
+            TsConverter.Convert(param.ParameterType, NullableHelper.IsNullable(param)));
     }
 
 
