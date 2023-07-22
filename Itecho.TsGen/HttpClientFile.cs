@@ -8,7 +8,7 @@ public static class HttpClientFile
     {
         var file = new TsFile();
 
-        file.Add(TsExp.Literal(@"import {type HttpOptions} from './httpHandler';
+        file.Add(TsExp.Literal(@"import {type HttpOptions} from './httpOptions';
 
 //  (url: string, options?: HttpOptions) => Promise<T>;
 export default function httpClient<T>(url: string, options?: HttpOptions): Promise<T> {

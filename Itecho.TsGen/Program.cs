@@ -84,20 +84,20 @@ public static class Program
         //         return "/api/address/index";
         //     }
         // }
-        var urls = controller
-            .Actions
-            .Where(r => r.Kind == ActionKind.Get)
-            .Select(g => new DictionaryEntry(TsExp.Literal(g.Name),
-                RouteHelper.BuildUrl(controller, g)));
-
-        tsFile.Add(TsExp.Assign(
-            TsExp.VariableDef("urls", VariableType.Const, null),
-            TsExp.Dictionary(urls)
-        ));
+        // var urls = controller
+        //     .Actions
+        //     .Where(r => r.Kind == ActionKind.Get)
+        //     .Select(g => new DictionaryEntry(TsExp.Literal(g.Name),
+        //         RouteHelper.BuildUrl(controller, g)));
+        //
+        // tsFile.Add(TsExp.Assign(
+        //     TsExp.VariableDef("urls", VariableType.Const, null),
+        //     TsExp.Dictionary(urls)
+        // ));
 
         var exportEntries = new List<DictionaryEntry>
         {
-            new(TsExp.Literal("urls"))
+            // new(TsExp.Literal("urls"))
         };
 
         exportEntries.AddRange(controller.Actions.Select(action => new DictionaryEntry(
@@ -113,45 +113,61 @@ public static class Program
 
     private static TsExp BuildControllerAction(ControllerInfo controller, ActionInfo action)
     {
-        // should conform the httpHandler.ts
-        // <TReq, TRes>(url: string, params?: HttpDic, body?: FormData | TReq, headers?: HttpDic) => Promise<TRes>;
-
-        // form, body, query, route, header bindings.
-
-        //     upsert(request: AddressRequest): Promise<AxiosResponse> {
-        //         return httpClient.post("/api/address/upsert", undefined, request, undefined);
-        //     },
+        /*
+         httpClient<T>(url: string, options?: HttpOptions): Promise<T>
+         export interface HttpOptions {
+            method?: 'get' | 'post' | 'put' | 'patch' | 'delete';
+            body?: object | FormData;
+            queryParams?: Record<string, unknown>;
+            headers?: Record<string, unknown>;
+        }
+        */
 
         var returnType = TsType.GenericReference(TsType.BuildIn("Promise"), action.ReturnType);
 
         var paramList = action.Parameters.Select(p =>
             new TsParameter(p.Name, p.Type));
 
-        // use route parameters to build the url
-        // all the rest are used inside the call
+        var options = new List<DictionaryEntry>();
+        // { method: 'get'} is the default
+        // for anything else we need to explicit pass it
+        if (action.Kind != ActionKind.Get)
+        {
+            options.Add(new DictionaryEntry(TsExp.Literal("method"), TsExp.String(action.Kind.ToString().ToLower())));
+        }
 
-        var urlsParams = action.Parameters
-            .Where(a => a.Kind is (ActionParameterKind.Query or ActionParameterKind.Route))
-            .Select(p => TsExp.Literal(p.Name))
-            .ToArray();
+        // handle [FromBody] and [FromForm]
+        var bodyParam = action.Parameters.SingleOrDefault(p => p.Kind is ActionParameterKind.Body or ActionParameterKind.Form);
+        if (bodyParam != null)
+        {
+            options.Add(new DictionaryEntry(TsExp.Literal("body"), TsExp.Literal(bodyParam.Name)));
+        }
 
+        // handle [FromQuery}
+        var queryParams = action.Parameters
+            .Where(p => p.Kind == ActionParameterKind.Query)
+            .Select(g => new DictionaryEntry(TsExp.Literal(g.Name)))
+            .ToList();
+        if (queryParams.Any())
+        {
+            options.Add(new DictionaryEntry(TsExp.Literal("queryParams"), TsExp.Dictionary(queryParams)));
+        }
 
-        return TsExp.Lambda(returnType, paramList,
-            TsExp.Block(
-                TsExp.Return(
-                    TsExp.FunctionCall(
-                        TsExp.ObjectAccess(TsExp.Literal("http"),
-                            RouteHelper.ActionMethod(action.Kind)
-                        ),
-                        // urls.name(param1, param2)
-                        TsExp.FunctionCall(
-                            TsExp.ObjectAccess(TsExp.Literal("urls"), action.Name),
-                            urlsParams
-                        )
-                    )
+        var clientParams = new List<TsExp>()
+        {
+            RouteHelper.BuildUrl(controller, action)
+        };
+        if (options.Any())
+        {
+            clientParams.Add(TsExp.Dictionary(options));
+        }
+
+        return TsExp.Lambda(returnType, paramList, TsExp.Block(
+            TsExp.Return(
+                TsExp.FunctionCall(TsExp.Literal("httpClient"), clientParams.ToArray()
                 )
             )
-        );
+        ));
     }
 
     private static void GenerateInterface(TsInterface @interface, string outputPath)

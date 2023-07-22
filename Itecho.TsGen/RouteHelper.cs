@@ -8,7 +8,7 @@ public static class RouteHelper
 {
     /// <summary>
     /// build the url for the action
-    /// influenced by FromRoute and FromQuery parameters
+    /// influenced by FromRoute parameters
     /// </summary>
     /// <param name="controller"></param>
     /// <param name="action"></param>
@@ -21,24 +21,7 @@ public static class RouteHelper
 
         // first handle the route parameters if any.
         // convert to interpolated string or normal string
-        var urlExp = FormatRoutes(url.ToLower(), action);
-
-        // then we handle the query parameters and use the buildUrl function
-        var q = action.Parameters
-            .Where(p => p.Kind == ActionParameterKind.Query)
-            .Select(p => new DictionaryEntry(TsExp.Literal(p.Name)));
-
-        var buildUrl = !q.Any()
-            ? urlExp
-            : TsExp.FunctionCall(TsExp.Literal("buildUrl"), urlExp, TsExp.Dictionary(q));
-
-        return TsExp.Lambda(
-            null,
-            action.Parameters
-                .Where(p => p.Kind is ActionParameterKind.Route or ActionParameterKind.Query)
-                .Select(p => TsExp.Parameter(FormatHelper.CamelCase(p.Name), p.Type)),
-            buildUrl
-        );
+        return FormatRoutes(url.ToLower(), action);
     }
 
     private static string FormatControllerName(string name)
@@ -53,9 +36,7 @@ public static class RouteHelper
     {
         return kind switch
         {
-            ActionKind.Post => "post", ActionKind.Get => "get", ActionKind.Patch => "patch",
-            ActionKind.Delete => "delete", ActionKind.Put => "put",
-            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+            ActionKind.Post => "post", ActionKind.Get => "get", ActionKind.Patch => "patch", ActionKind.Delete => "delete", ActionKind.Put => "put", _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
     }
 
