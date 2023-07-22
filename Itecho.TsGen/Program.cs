@@ -48,7 +48,7 @@ public static class Program
         }
 
         // generate the general http handler
-        HttpHandlerFile.Generate().WriteToFile(Path.Combine(outputPath, "httpHandler"));
+        HttpOptions.Generate().WriteToFile(Path.Combine(outputPath, "httpOptions"));
         // and the http concrete handler for the user to change
         var httpClientPath = Path.Combine(outputPath, "httpClient");
         if (!File.Exists(httpClientPath))
@@ -69,7 +69,7 @@ public static class Program
         // import the user customisable http client 
         tsFile.Add(TsExp.Import("./httpClient", new ImportExp.NamedImport("httpClient", false)));
         tsFile.Add(TsExp.EmptyLine());
-        
+
         // import all references for this controller
         foreach (var import in controller.GetReferencedTypes())
         {
@@ -113,17 +113,22 @@ public static class Program
 
     private static TsExp BuildControllerAction(ControllerInfo controller, ActionInfo action)
     {
-        // should con
+        // should conform the httpHandler.ts
         // <TReq, TRes>(url: string, params?: HttpDic, body?: FormData | TReq, headers?: HttpDic) => Promise<TRes>;
 
+        // form, body, query, route, header bindings.
+
         //     upsert(request: AddressRequest): Promise<AxiosResponse> {
-        //         return Axios.post("/api/address/upsert", request, defaultConfig);
+        //         return httpClient.post("/api/address/upsert", undefined, request, undefined);
         //     },
 
         var returnType = TsType.GenericReference(TsType.BuildIn("Promise"), action.ReturnType);
 
         var paramList = action.Parameters.Select(p =>
             new TsParameter(p.Name, p.Type));
+
+        // use route parameters to build the url
+        // all the rest are used inside the call
 
         var urlsParams = action.Parameters
             .Where(a => a.Kind is (ActionParameterKind.Query or ActionParameterKind.Route))
@@ -153,7 +158,7 @@ public static class Program
     {
         var tsFile = new TsFile();
         tsFile.Add(VersionInfo.GenerationNotice);
-        
+
         // import all interfaces referenced by this interface
         foreach (var import in @interface.GetReferencedTypes())
         {

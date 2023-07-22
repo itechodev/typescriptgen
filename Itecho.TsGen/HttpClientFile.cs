@@ -8,23 +8,11 @@ public static class HttpClientFile
     {
         var file = new TsFile();
 
-        file.Add(TsExp.Literal(@"import {type HttpHandler, type HttpDic} from './httpHandler';
+        file.Add(TsExp.Literal(@"import {type HttpOptions} from './httpHandler';
 
-const httpClient: HttpClient = {
-    post: function <TReq, TRes>(url: string, params?: HttpDic | undefined, body?: TReq | FormData | undefined, headers?: HttpDic | undefined): Promise<TRes> {
-        throw new Error('Function not implemented.');
-    },
-    get: function <TReq, TRes>(url: string, params?: HttpDic | undefined, body?: TReq | FormData | undefined, headers?: HttpDic | undefined): Promise<TRes> {
-        throw new Error('Function not implemented.');
-    },
-    put: function <TReq, TRes>(url: string, params?: HttpDic | undefined, body?: TReq | FormData | undefined, headers?: HttpDic | undefined): Promise<TRes> {
-        throw new Error('Function not implemented.');
-    patch: function <TReq, TRes>(url: string, params?: HttpDic | undefined, body?: TReq | FormData | undefined, headers?: HttpDic | undefined): Promise<TRes> {
-        throw new Error('Function not implemented.');
-    },
-    delete: function <TReq, TRes>(url: string, params?: HttpDic | undefined, body?: TReq | FormData | undefined, headers?: HttpDic | undefined): Promise<TRes> {
-        throw new Error('Function not implemented.');
-    }
+//  (url: string, options?: HttpOptions) => Promise<T>;
+export default function httpClient<T>(url: string, options?: HttpOptions): Promise<T> {
+    throw new Error('Function not implemented.');
 }"));
         return file;
     }
