@@ -54,12 +54,6 @@ public class TsCodeGenerator
         _startOfNewLine = true;
     }
 
-    public static string CamelCase(string s)
-    {
-        return JsonNamingPolicy.CamelCase.ConvertName(s);
-    }
-
-
     public void WriteToFile(string fileName)
     {
         File.WriteAllText(fileName, _builder.ToString());
