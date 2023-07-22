@@ -4,7 +4,7 @@ namespace Itecho.TsGen.TSExpressions;
 
 public class InterfaceExp : TsExp
 {
-    public TsInterface @Interface { get; }
+    public new TsInterface @Interface { get; }
 
     public InterfaceExp(TsInterface @interface)
     {

@@ -3,7 +3,7 @@ namespace Itecho.TsGen.TSExpressions;
 public class CommentExp : TsExp
 {
     private bool IsJsDoc { get; }
-    private string Comment { get; }
+    private new string Comment { get; }
 
     public CommentExp(string comment, bool isJsDoc = false)
     {

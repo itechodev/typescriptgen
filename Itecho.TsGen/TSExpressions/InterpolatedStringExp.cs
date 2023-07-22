@@ -43,7 +43,7 @@ public class InterpolatedStringExp : TsExp
 {
     public InterpolatedSegment[] Segments { get; }
 
-    public static StringSegment String(string value)
+    public new static StringSegment String(string value)
     {
         return new StringSegment(value);
     }

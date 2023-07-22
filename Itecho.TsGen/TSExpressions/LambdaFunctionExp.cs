@@ -9,7 +9,7 @@ public class LambdaFunctionExp : TsExp
     public IEnumerable<TsParameter> Parameters { get; }
 
     // block or implicit return
-    public TsExp Block { get; }
+    public new TsExp Block { get; }
 
     public LambdaFunctionExp(TsType? returnType, IEnumerable<TsParameter> parameters, TsExp block)
     {

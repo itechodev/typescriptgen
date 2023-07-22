@@ -7,7 +7,7 @@ public class FunctionDefExp : TsExp
     public string Name { get; }
     public TsType ReturnType { get; }
     public IEnumerable<TsParameter> Parameters { get; }
-    public TsBlockExp Block { get; }
+    public new TsBlockExp Block { get; }
 
     public FunctionDefExp(string name, TsType returnType, IEnumerable<TsParameter> parameters, TsBlockExp block)
     {

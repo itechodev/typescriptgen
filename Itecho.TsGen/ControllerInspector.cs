@@ -32,7 +32,7 @@ public enum ActionKind
 public class ActionInfo
 {
     public string RouteTemplate { get; set; } = string.Empty;
-    public TsType ReturnType { get; set; }
+    public TsType ReturnType { get; set; } = TsType.Primitive(TsPrimitive.TsPrimitiveType.Unknown);
     public ActionKind Kind { get; set; }
     public string Name { get; set; } = string.Empty;
     public List<ActionParameter> Parameters { get; set; } = new();
