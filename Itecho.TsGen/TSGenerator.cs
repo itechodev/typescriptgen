@@ -27,7 +27,7 @@ public static class TSGenerator
         tsFile.Add(TsExp.EmptyLine());
 
         var exportEntries = controller.Actions.Select(action => new DictionaryEntry(
-            TsExp.Literal(action.Name),
+            TsExp.Literal(FormatHelper.CamelCase(action.Name)),
             BuildControllerAction(controller, action))
         );
 

@@ -35,9 +35,9 @@ public class TsCodeGenerator
     }
 
     // wrap writings inside a block with indenting
-    public void Block(Action action)
+    public void Block(Action action, bool spaceBefore = false)
     {
-        Write("{");
+        Write("{", spaceBefore);
         Indent();
         NewLine();
         action.Invoke();

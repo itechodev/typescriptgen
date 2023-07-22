@@ -30,6 +30,6 @@ public class InterfaceExp : TsExp
                 gen.Write($"{FormatHelper.CamelCase(member.Name)}: {TsTypeGenerator.Generate(member.Type)};");
                 gen.NewLine();
             }
-        });
+        }, true);
     }
 }
