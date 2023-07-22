@@ -50,57 +50,13 @@ public class TsInterface : TsType
         Extends = extends;
         Generics = generics;
     }
-
-    private static void GetReferenceType(List<string> ret, IEnumerable<TsType> list)
-    {
-        foreach (var m in list)
-        {
-            GetReferenceType(ret, m);
-        }
-    }
-
-    private static void GetReferenceType(List<string> ret, TsType type)
-    {
-        switch (type)
-        {
-            case TsInterface @interface:
-                ret.Add(@interface.Name);
-                return;
-            case TsGenericReference genericReference:
-                GetReferenceType(ret, genericReference.ReferencedType);
-                GetReferenceType(ret, genericReference.Parameters);
-                return;
-            case TsEnum @enum:
-                ret.Add(@enum.Name);
-                return;
-            case TsArray array:
-                GetReferenceType(ret, array.ElementType);
-                return;
-            case TsDictionary dictionary:
-                GetReferenceType(ret, dictionary.Key);
-                GetReferenceType(ret, dictionary.Value);
-                return;
-            case TsUnion union:
-                GetReferenceType(ret, union.Types);
-                return;
-            case TsIntersection intersection:
-                GetReferenceType(ret, intersection.Types);
-                return;
-        }
-    }
-
     public List<string> GetReferencedTypes()
     {
-        var list = new List<string>();
+        var resolver = new TsImportTypeResolver();
         if (Extends != null)
-            list.Add(Extends.Name);
+            resolver.Resolve(Extends);
 
-        GetReferenceType(list, Members.Select(m => m.Type));
-
-        return list
-            .Distinct()
-            .Where(n => n != Name)
-            .OrderBy(n => n)
-            .ToList();
+        resolver.Resolve(Members.Select(m => m.Type));
+        return resolver.GetImports(Name);
     }
 }

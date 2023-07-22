@@ -65,6 +65,19 @@ public static class Program
         tsFile.Add(TsExp.Comment("eslint-disable", true));
         tsFile.Add(VersionInfo.GenerationNotice);
 
+        tsFile.Add(TsExp.EmptyLine());
+        // import the user customisable http client 
+        tsFile.Add(TsExp.Import("./httpClient", new ImportExp.NamedImport("httpClient", false)));
+        tsFile.Add(TsExp.EmptyLine());
+        
+        // import all references for this controller
+        foreach (var import in controller.GetReferencedTypes())
+        {
+            tsFile.Add(TsExp.Import($"./{import}", new ImportExp.NamedImport(import, true)));
+            tsFile.Add(TsExp.EmptyLine());
+        }
+
+        tsFile.Add(TsExp.EmptyLine());
         // export only for get methods
         // const urls = {
         //     index(p1: number, p2: number): string {
@@ -100,6 +113,9 @@ public static class Program
 
     private static TsExp BuildControllerAction(ControllerInfo controller, ActionInfo action)
     {
+        // should con
+        // <TReq, TRes>(url: string, params?: HttpDic, body?: FormData | TReq, headers?: HttpDic) => Promise<TRes>;
+
         //     upsert(request: AddressRequest): Promise<AxiosResponse> {
         //         return Axios.post("/api/address/upsert", request, defaultConfig);
         //     },
@@ -137,7 +153,7 @@ public static class Program
     {
         var tsFile = new TsFile();
         tsFile.Add(VersionInfo.GenerationNotice);
-
+        
         // import all interfaces referenced by this interface
         foreach (var import in @interface.GetReferencedTypes())
         {

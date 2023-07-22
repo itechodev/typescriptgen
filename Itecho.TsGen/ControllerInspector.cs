@@ -9,15 +9,24 @@ public class ControllerInfo
     public string Name { get; set; } = string.Empty;
     public string RouteTemplate { get; set; } = string.Empty;
     public List<ActionInfo> Actions { get; set; } = new();
+
+    public List<string> GetReferencedTypes()
+    {
+        var resolver = new TsImportTypeResolver();
+
+        foreach (var action in Actions)
+        {
+            resolver.Resolve(action.ReturnType);
+            resolver.Resolve(action.Parameters.Select(p => p.Type));
+        }
+
+        return resolver.GetImports(Name);
+    }
 }
 
 public enum ActionKind
 {
-    Post,
-    Get,
-    Patch,
-    Delete,
-    Put
+    Post, Get, Patch, Delete, Put
 }
 
 public class ActionInfo
@@ -31,11 +40,7 @@ public class ActionInfo
 
 public enum ActionParameterKind
 {
-    Route,
-    Body,
-    Query,
-    Form,
-    Header
+    Route, Body, Query, Form, Header
 }
 
 public class ActionParameter
@@ -108,11 +113,8 @@ public static class ControllerInspector
 
         return new ActionInfo()
         {
-            Name = methodInfo.Name,
-            RouteTemplate = route?.Template ?? "",
-            ReturnType = TsConverter.Convert(methodInfo.ReturnType),
-            Kind = PopulateMethodKind(methodInfo),
-            Parameters = methodInfo
+            Name = methodInfo.Name, RouteTemplate = route?.Template ?? "", ReturnType = TsConverter.Convert(methodInfo.ReturnType), Kind = PopulateMethodKind(methodInfo)
+            , Parameters = methodInfo
                 .GetParameters()
                 .Select(PopulateParameter)
                 .Where(p => p != null)
@@ -127,9 +129,7 @@ public static class ControllerInspector
         var route = controller.GetCustomAttribute<RouteAttribute>();
         return new ControllerInfo()
         {
-            Name = controller.Name,
-            RouteTemplate = route?.Template ?? string.Empty,
-            Actions = controller.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+            Name = controller.Name, RouteTemplate = route?.Template ?? string.Empty, Actions = controller.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                 .Select(PopulateMethod)
                 .ToList()
         };
