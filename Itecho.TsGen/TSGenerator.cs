@@ -20,7 +20,7 @@ public static class TSGenerator
         // import all references for this controller
         foreach (var import in controller.GetReferencedTypes())
         {
-            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
+            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, false)));
             tsFile.Add(TsExp.EmptyLine());
         }
 
@@ -131,6 +131,7 @@ public static class TSGenerator
         foreach (var import in @interface.GetReferencedTypes())
         {
             tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
+            tsFile.Add(TsExp.EmptyLine());
         }
 
         tsFile.Add(TsExp.EmptyLine());
