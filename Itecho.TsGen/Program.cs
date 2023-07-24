@@ -10,14 +10,24 @@ public static class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length != 2)
+        if (args.Length < 2)
         {
             Console.WriteLine($"typescript generator v{VersionInfo.VersionString}");
             Console.WriteLine("-------------");
             Console.WriteLine("\nUsage:");
-            // dll 
-            // ouput path
+            Console.WriteLine("args[0] = assembly path to inspect");
+            Console.WriteLine("args[1] = output path for TS models");
+            Console.WriteLine("-ignore=values = controller names to ignore; separated by comma");
             return;
+        }
+
+        var list = ProcessArguments.Process(args.Skip(2));
+        foreach (var arg in list)
+        {
+            if (arg.Name == "ignore")
+            {
+                TsGenArguments.Ignore = arg.Value.Split(",").Select(f => f.ToLower()).ToList();
+            }
         }
 
         var assemblyPath = Path.GetFullPath(args[0]);
