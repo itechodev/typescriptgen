@@ -12,15 +12,4 @@
         <PackageOutputPath>./nupkg</PackageOutputPath>
         <Version>1.0.1</Version>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Reference Include="Newtonsoft.Json">
-        <HintPath>..\..\itest-leaf\Web\bin\Debug\net6.0\Newtonsoft.Json.dll</HintPath>
-      </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    </ItemGroup>
-
 </Project>
