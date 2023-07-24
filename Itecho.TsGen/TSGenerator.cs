@@ -8,6 +8,11 @@ public static class TsGenerator
 {
     public static void GenerateController(ControllerInfo controller, string outputPath)
     {
+        if (controller.Actions.Count == 0)
+        {
+            return;
+        }
+        
         var tsFile = new TsFile();
         tsFile.Add(TsExp.Comment("eslint-disable", true));
         tsFile.Add(VersionInfo.GenerationNotice);
