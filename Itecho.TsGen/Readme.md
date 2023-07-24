@@ -13,6 +13,7 @@ dotnet tool install Itecho.TsGen --version 1.0.0
 ```
 
 Which will generate the following file:
+
 ```json
 {
   "version": 1,
@@ -41,20 +42,37 @@ dotnet itecho.tsgen ...
 ```
 
 Configure in csproj to run the tool after build
+
 ```xml
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="dotnet itecho.tsgen ..." />
-  </Target>
+
+<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="dotnet itecho.tsgen ..."/>
+</Target>
 ```
 
 # Deployment
 
 Update .csproj version, create tag in git and push.
-
 Automated with tool Versionize. https://github.com/versionize/versionize
+Follow commit convention: https://www.conventionalcommits.org/en/v1.0.0/
 
+```bash
+dotnet versionize
+```
 
+```bash
+# fix
+git commit -a -m "fix: something went wrong we need a bugfix release"
+dotnet versionize
+# Generates version 1.0.1
 
+# feat
+git commit -a -m "feat: something really awesome coming in the next release"
+dotnet versionize
+# Generates version 1.1.0
 
-
-
+# BREAKING CHANGE
+git commit -a -m "feat: a really cool new feature" -m "BREAKING CHANGE: the API will break. sorry"
+dotnet versionize
+# Generates version 2.0.0
+```
