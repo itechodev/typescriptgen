@@ -1,7 +1,6 @@
 using System.Reflection;
 using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Itecho.TsGen;
 
@@ -241,8 +240,8 @@ public static class TsConverter
         var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
             .Select(p =>
             {
-                var json = p.GetCustomAttribute<JsonPropertyAttribute>();
-                var name = json?.PropertyName ?? p.Name;
+                
+                var name = GetCustomPropertyName(p) ?? p.Name;
                 return new TsInterface.TsInterfaceMember(name, Convert(p.PropertyType, NullableHelper.IsNullable(p)));
             })
             .ToArray();
@@ -256,6 +255,20 @@ public static class TsConverter
         ret.CopyFrom(new TsInterface(FormatName(type.Name), members, extends as TsInterface, generics));
         // dont call setCache here, it's already added to the caches
         return ret;
+    }
+
+    private static string? GetCustomPropertyName(PropertyInfo propertyInfo)
+    {
+        // propertyInfo.GetCustomAttribute<Newtonsoft.Json.JsonPropertyAttribute>()?.PropertyName; always return null
+        var attrData = propertyInfo.GetCustomAttributesData();
+        var jsonAttrs = attrData.SingleOrDefault(a => a.AttributeType.Name == "JsonPropertyAttribute");
+
+        if (jsonAttrs != null && jsonAttrs.ConstructorArguments.Count > 0)
+        {
+            return jsonAttrs.ConstructorArguments[0].Value?.ToString();
+        }
+
+        return null;
     }
 
     private static TsType ConvertDictionary(Type type)
