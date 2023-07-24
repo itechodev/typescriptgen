@@ -143,7 +143,7 @@ public static class ControllerInspector
     {
         return assembly
             .GetExportedTypes()
-            .Where(t => typeof(Controller).IsAssignableFrom(t) || typeof(ControllerBase).IsAssignableFrom(t) && !TsGenArguments.Ignore.Contains(t.Name.ToLower()))
+            .Where(t => (typeof(Controller).IsAssignableFrom(t) || typeof(ControllerBase).IsAssignableFrom(t)) && !TsGenArguments.Ignore.Contains(t.Name.ToLower()))
             .Select(PopulateController)
                 .ToList();
     }

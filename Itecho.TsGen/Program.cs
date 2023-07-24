@@ -26,7 +26,7 @@ public static class Program
         {
             if (arg.Name == "ignore")
             {
-                TsGenArguments.Ignore = arg.Value.Split(",").Select(f => f.ToLower()).ToList();
+                TsGenArguments.Ignore = arg.Value.Select(f => f.ToLower()).ToList();
             }
         }
 
