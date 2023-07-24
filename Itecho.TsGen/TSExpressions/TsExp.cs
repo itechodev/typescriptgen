@@ -15,7 +15,7 @@ public abstract class TsExp
     public static CommentExp Comment(string comment, bool isJsDoc = false) => new(comment, isJsDoc);
     public static MultilineCommentExp MultilineComment(params string[] lines) => new(lines);
 
-    public static ImportExp Import(string library, ImportExp.NamedImport @default,
+    public static ImportExp Import(string library, ImportExp.NamedImport? @default,
         params ImportExp.NamedImport[] imports) =>
         new(library, @default, imports);
 

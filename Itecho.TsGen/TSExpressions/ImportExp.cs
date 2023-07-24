@@ -41,7 +41,7 @@ public class ImportExp : TsExp
         gen.Write(FormatHelper.Spaces(
             "import",
             @Default?.Generate(),
-            string.Join(", ", Imports.Select(i => i.Generate())),
+            Imports.Any() ? "{ " + string.Join(", ", Imports.Select(i => i.Generate())) + " }" : string.Empty,
             $"from \"{Library}\";"
         ));
     }
