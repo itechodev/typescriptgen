@@ -50,7 +50,7 @@ Configure in csproj to run the tool after build
 </Target>
 ```
 
-# Deployment
+# Prepare Release
 
 Update .csproj version, create tag in git and push.
 Automated with tool Versionize. https://github.com/versionize/versionize
@@ -76,3 +76,13 @@ git commit -a -m "feat: a really cool new feature" -m "BREAKING CHANGE: the API 
 dotnet versionize
 # Generates version 2.0.0
 ```
+
+# Publish
+
+Github draft new release:
+https://github.com/itechodev/typescriptgen/releases/new
+
+Choose tag, give title and description and publish.
+
+
+
