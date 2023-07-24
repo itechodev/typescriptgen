@@ -1,11 +1,11 @@
 using Itecho.TsGen.TSExpressions;
 using Itecho.TsGen.TsTypes;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Itecho.TsGen;
 
-public static class TSGenerator
+public static class TsGenerator
 {
-
     public static void GenerateController(ControllerInfo controller, string outputPath)
     {
         var tsFile = new TsFile();
@@ -14,7 +14,9 @@ public static class TSGenerator
 
         tsFile.Add(TsExp.EmptyLine());
         // import the user customisable http client 
-        tsFile.Add(TsExp.Import("./makeRequest", new ImportExp.NamedImport("makeRequest", false)));
+        tsFile.Add(TsExp.Import("./request", null, 
+            new ImportExp.NamedImport("webRequest", false),
+            new ImportExp.NamedImport("fileRequest", false)));
         tsFile.Add(TsExp.EmptyLine());
 
         // import all references for this controller
@@ -69,15 +71,27 @@ public static class TSGenerator
             clientParams.Add(TsExp.Dictionary(options));
         }
 
+        // If file is returned from GET action
+        // only return the url tha will download the file
+        // so that it can be freely used in different downloading options
+        if (action.ReturnType is TsBuildInType { BuildInType: BuildInType.File })
+        {
+            return TsExp.Lambda(null, paramList,
+                TsExp.Return(
+                    TsExp.FunctionCall(TsExp.Literal("fileRequest"), null, clientParams.ToArray())
+                ));
+        }
+
         return TsExp.Lambda(null, paramList,
             TsExp.Return(
-                TsExp.FunctionCall(TsExp.Literal("makeRequest"), new List<TsType>
+                TsExp.FunctionCall(TsExp.Literal("webRequest"), new List<TsType>
                     {
                         action.ReturnType
                     }, clientParams.ToArray()
                 )
             ));
     }
+
     private static void AddHeaders(List<DictionaryEntry> options, ActionInfo action)
     {
         // handle [FromHeader}
@@ -91,6 +105,7 @@ public static class TSGenerator
             options.Add(new DictionaryEntry(TsExp.Literal("headers"), TsExp.Dictionary(headerParams)));
         }
     }
+
     private static void AddQueryParams(List<DictionaryEntry> options, ActionInfo action)
     {
         // handle [FromQuery}
@@ -103,10 +118,12 @@ public static class TSGenerator
             options.Add(new DictionaryEntry(TsExp.Literal("queryParams"), TsExp.Dictionary(queryParams)));
         }
     }
+
     private static void AddBody(List<DictionaryEntry> options, ActionInfo action)
     {
         // handle [FromBody] and [FromForm]
-        var bodyParam = action.Parameters.SingleOrDefault(p => p.Kind is ActionParameterKind.Body or ActionParameterKind.Form);
+        var bodyParam =
+            action.Parameters.SingleOrDefault(p => p.Kind is ActionParameterKind.Body or ActionParameterKind.Form);
         if (bodyParam != null)
         {
             options.Add(new DictionaryEntry(TsExp.Literal("body"), TsExp.Literal(bodyParam.Name)));
@@ -121,7 +138,6 @@ public static class TSGenerator
         {
             options.Add(new DictionaryEntry(TsExp.Literal("method"), TsExp.String(kind.ToString().ToLower())));
         }
-
     }
 
     public static void GenerateInterface(TsInterface @interface, string outputPath)

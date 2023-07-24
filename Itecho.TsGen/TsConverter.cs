@@ -117,9 +117,18 @@ public static class TsConverter
             return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
         // convert IFormFile to File in TS, which is build in
+        // mostly used in requests
         if (type == typeof(IFormFile))
         {
-            return new TsBuildInType("File");
+            return new TsBuildInType(BuildInType.File);
+        }
+
+        // or when controller returns FileContentResult or FileStreamResult
+        // which both inherits from FileResult
+        // mostly used in responses
+        if (typeof(FileResult).IsAssignableFrom(type))
+        {
+            return new TsBuildInType(BuildInType.File);
         }
 
         // First check dictionary then array because Dictionary inherits from IEnumerable

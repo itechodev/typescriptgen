@@ -33,6 +33,7 @@ public class ActionInfo
 {
     public string RouteTemplate { get; set; } = string.Empty;
     public TsType ReturnType { get; set; } = TsType.Primitive(TsPrimitive.TsPrimitiveType.Unknown);
+    public Type ReturnTypeClr { get; set; } = typeof(object);
     public ActionKind Kind { get; set; }
     public string Name { get; set; } = string.Empty;
     public List<ActionParameter> Parameters { get; set; } = new();
@@ -113,8 +114,11 @@ public static class ControllerInspector
 
         return new ActionInfo()
         {
-            Name = methodInfo.Name, RouteTemplate = route?.Template ?? "", ReturnType = TsConverter.Convert(methodInfo.ReturnType), Kind = PopulateMethodKind(methodInfo)
-            , Parameters = methodInfo
+            Name = methodInfo.Name,
+            RouteTemplate = route?.Template ?? "",
+            ReturnType = TsConverter.Convert(methodInfo.ReturnType),
+            ReturnTypeClr = methodInfo.ReturnType,
+            Kind = PopulateMethodKind(methodInfo), Parameters = methodInfo
                 .GetParameters()
                 .Select(PopulateParameter)
                 .Where(p => p != null)

@@ -9,7 +9,7 @@ public static class TsTypeGenerator
         return type switch
         {
             TsArray array => $"{Generate(array.ElementType)}[]",
-            TsBuildInType buildInType => buildInType.BuildInType,
+            TsBuildInType buildInType => GenerateBuildInType(buildInType),
             TsIntersection intersection => string.Join(" & ", intersection.Types.Select(Generate)),
             TsTuple tuple => $"[{string.Join(", ", tuple.Types.Select(Generate))}]",
             TsUnion union => string.Join(" | ", union.Types.Select(Generate)),
@@ -23,6 +23,15 @@ public static class TsTypeGenerator
             TsPrimitive primitive => GeneratePrimitive(primitive),
             TsVoid @void => "void",
             _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
+    }
+
+    private static string GenerateBuildInType(TsBuildInType buildInType)
+    {
+        return buildInType.BuildInType switch
+        {
+            BuildInType.File => "File",
+            _ => throw new ArgumentOutOfRangeException()
         };
     }
 

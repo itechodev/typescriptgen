@@ -15,6 +15,8 @@ public static class Program
             Console.WriteLine($"typescript generator v{VersionInfo.VersionString}");
             Console.WriteLine("-------------");
             Console.WriteLine("\nUsage:");
+            // dll 
+            // ouput path
             return;
         }
 
@@ -37,18 +39,18 @@ public static class Program
         // generate interfaces per file
         foreach (var @interface in interfaces)
         {
-            TSGenerator.GenerateInterface(@interface, outputPath);
+            TsGenerator.GenerateInterface(@interface, outputPath);
         }
 
         foreach (var controller in controllers)
         {
-            TSGenerator.GenerateController(controller, outputPath);
+            TsGenerator.GenerateController(controller, outputPath);
         }
 
         // generate the general http handler
         RequestOptions.Generate().WriteToFile(Path.Combine(outputPath, "requestOptions"));
         // and the http concrete handler for the user to change
-        var httpClientPath = Path.Combine(outputPath, "makeRequest");
+        var httpClientPath = Path.Combine(outputPath, "request");
         if (!File.Exists(httpClientPath))
         {
             HttpMakeRequestFile.Generate().WriteToFile(httpClientPath);
