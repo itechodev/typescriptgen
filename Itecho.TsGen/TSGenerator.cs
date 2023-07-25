@@ -6,20 +6,45 @@ namespace Itecho.TsGen;
 
 public static class TsGenerator
 {
+    private static bool IsExplicitReturn(ActionInfo action)
+    {
+        // if explicit returns is not set, then we generate all methods
+        if (!TsGenArguments.ExplicitReturns)
+            return true;
+
+        return action.ReturnType switch
+        {
+            TsVoid => false,
+            TsPrimitive prim => prim.Type != TsPrimitive.TsPrimitiveType.Any &&
+                                prim.Type != TsPrimitive.TsPrimitiveType.Undefined &&
+                                prim.Type != TsPrimitive.TsPrimitiveType.Unknown,
+
+            // anything else is considered explicit
+            _ => true
+        };
+    }
+
     public static void GenerateController(ControllerInfo controller, string outputPath)
     {
         if (controller.Actions.Count == 0)
         {
             return;
         }
-        
+
+        var explicitActions = controller.Actions.Where(IsExplicitReturn).ToList();
+        if (!explicitActions.Any())
+        {
+            // all actions are implicit. Nothing doing
+            return;
+        }
+
         var tsFile = new TsFile();
         tsFile.Add(TsExp.Comment("eslint-disable", true));
         tsFile.Add(VersionInfo.GenerationNotice);
 
         tsFile.Add(TsExp.EmptyLine());
         // import the user customisable http client 
-        tsFile.Add(TsExp.Import("./request", null, 
+        tsFile.Add(TsExp.Import("./request", null,
             new ImportExp.NamedImport("webRequest", false),
             new ImportExp.NamedImport("fileRequest", false)));
         tsFile.Add(TsExp.EmptyLine());
@@ -33,7 +58,7 @@ public static class TsGenerator
 
         tsFile.Add(TsExp.EmptyLine());
 
-        var exportEntries = controller.Actions.Select(action => new DictionaryEntry(
+        var exportEntries = explicitActions.Select(action => new DictionaryEntry(
             TsExp.Literal(FormatHelper.CamelCase(action.Name)),
             BuildControllerAction(controller, action))
         );

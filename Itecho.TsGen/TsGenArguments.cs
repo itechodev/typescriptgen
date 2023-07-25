@@ -2,5 +2,6 @@ namespace Itecho.TsGen;
 
 public static class TsGenArguments
 {
-    public static List<string> Ignore { get; set; } = new(); 
+    public static List<string> Ignore { get; set; } = new();
+    public static bool ExplicitReturns { get; set; }
 }

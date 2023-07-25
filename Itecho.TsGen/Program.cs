@@ -17,16 +17,22 @@ public static class Program
             Console.WriteLine("\nUsage:");
             Console.WriteLine("args[0] = assembly path to inspect");
             Console.WriteLine("args[1] = output path for TS models");
-            Console.WriteLine("-ignore=values = controller names to ignore; separated by comma");
+            Console.WriteLine("-ignore controllerName1 controllerName2 = ignore controller that matches these names;");
+            Console.WriteLine("-explicitReturns = only generate methods that explicit returns a value. Discard generic ActionResult returns.");
             return;
         }
 
         var list = ProcessArguments.Process(args.Skip(2));
         foreach (var arg in list)
         {
-            if (arg.Name == "ignore")
+            switch (arg.Name)
             {
-                TsGenArguments.Ignore = arg.Value.Select(f => f.ToLower()).ToList();
+                case "ignore":
+                    TsGenArguments.Ignore = arg.Value.Select(f => f.ToLower()).ToList();
+                    break;
+                case "explicitReturns":
+                    TsGenArguments.ExplicitReturns = true;
+                    break;
             }
         }
 
