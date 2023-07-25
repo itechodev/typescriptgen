@@ -151,10 +151,19 @@ public static class ControllerInspector
         return new ControllerInfo()
         {
             Name = controller.Name, RouteTemplate = route?.Template ?? string.Empty, Actions = controller
-                .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.InvokeMethod)
+                .Where(FilterMethod)
                 .Select(PopulateMethod)
                 .ToList()
         };
+    }
+
+    private static bool FilterMethod(MethodInfo m)
+    {
+        // GetMethods() returns all the methods of the type including property getters and setters because they are technically methods (with special names).
+        // Unfortunately, there's no direct way to filter out the property methods using only binding flags.
+        // Property getter methods are named with a "get_" prefix, and setter methods are named with a "set_" prefix.
+        return !m.Name.StartsWith("get_") && !m.Name.StartsWith("set_");
     }
 
     public static List<ControllerInfo> Inspect(Assembly assembly)
