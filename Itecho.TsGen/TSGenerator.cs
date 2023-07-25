@@ -44,7 +44,7 @@ public static class TsGenerator
 
         tsFile.Add(TsExp.EmptyLine());
         // import the user customisable http client 
-        tsFile.Add(TsExp.Import("./request", null,
+        tsFile.Add(TsExp.Import("../request", null,
             new ImportExp.NamedImport("webRequest", false),
             new ImportExp.NamedImport("fileRequest", false)));
         tsFile.Add(TsExp.EmptyLine());
@@ -52,7 +52,7 @@ public static class TsGenerator
         // import all references for this controller
         foreach (var import in controller.GetReferencedTypes())
         {
-            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
+            tsFile.Add(TsExp.Import($"../{TsGenArguments.InterfacesFolder}/{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
             tsFile.Add(TsExp.EmptyLine());
         }
 
@@ -65,7 +65,7 @@ public static class TsGenerator
 
         tsFile.Add(TsExp.DefaultExport(TsExp.Dictionary(exportEntries)));
 
-        tsFile.WriteToFile(Path.Combine(outputPath,
+        tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.ControllerFolder,
             FormatHelper.CamelCase(controller.Name)));
     }
 
@@ -184,7 +184,7 @@ public static class TsGenerator
 
         tsFile.Add(TsExp.EmptyLine());
         tsFile.Add(TsExp.DefaultExport(TsExp.Interface(@interface)));
-
-        tsFile.WriteToFile(Path.Combine(outputPath, FormatHelper.CamelCase(@interface.Name)));
+        
+        tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.InterfacesFolder, FormatHelper.CamelCase(@interface.Name)));
     }
 }
