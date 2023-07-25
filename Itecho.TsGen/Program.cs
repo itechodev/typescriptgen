@@ -18,8 +18,8 @@ public static class Program
             Console.WriteLine("args[0] = assembly path to inspect");
             Console.WriteLine("args[1] = output path for TS models");
             Console.WriteLine("-ignore controllerName1 controllerName2 = ignore controller that matches these names;");
-            Console.WriteLine("-explicitReturns = only generate methods that explicit returns a value. Discard generic ActionResult returns.");
-            return;
+            Console.WriteLine(
+                "-explicitReturns = only generate methods that explicit returns a value. Discard generic ActionResult returns.");
         }
 
         var list = ProcessArguments.Process(args.Skip(2));
@@ -41,6 +41,13 @@ public static class Program
         Console.WriteLine("Inspecting assembly: " + assemblyPath);
         Console.WriteLine("Output path: " + outputPath);
 
+        
+        // make sure directories exists
+        Directory.CreateDirectory(outputPath);
+        EmptyFolder(Path.Combine(outputPath, TsGenArguments.ControllerFolder));
+        EmptyFolder(Path.Combine(outputPath, TsGenArguments.InterfacesFolder));
+        
+        
         // Loading assembly dependencies from a complete output path
         // using a custom AssemblyLoadContext and AssemblyDependencyResolver
         var loadContext = new DependencyLoadContext(assemblyPath);
@@ -66,10 +73,10 @@ public static class Program
         // generate the general http handler
         RequestOptions.Generate().WriteToFile(Path.Combine(outputPath, "requestOptions"));
         // and the http concrete handler for the user to change
-        var httpClientPath = Path.Combine(outputPath, "request");
-        if (!File.Exists(httpClientPath))
+        var requestPath = Path.Combine(outputPath, "request");
+        if (!File.Exists(requestPath))
         {
-            HttpMakeRequestFile.Generate().WriteToFile(httpClientPath);
+            HttpMakeRequestFile.Generate().WriteToFile(requestPath);
         }
 
         File.WriteAllLines(Path.Combine(outputPath, ".version"), new[]
@@ -78,5 +85,15 @@ public static class Program
             "Arguments used:",
             "dotnet itecho.tsgen " + string.Join(" ", args)
         });
+    }
+
+    private static void EmptyFolder(string folder)
+    {
+        if (Directory.Exists(folder))
+        {
+            Directory.Delete(folder, true);
+        }
+
+        Directory.CreateDirectory(folder);
     }
 }
