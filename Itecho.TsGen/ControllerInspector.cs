@@ -12,15 +12,15 @@ public class ControllerInfo
 
     public List<string> GetReferencedTypes()
     {
-        var resolver = new TsImportTypeResolver();
+        var resolver = new TsImportTypeResolver(null);
 
         foreach (var action in Actions)
         {
-            resolver.Resolve(action.ReturnType);
-            resolver.Resolve(action.Parameters.Select(p => p.Type));
+            resolver.Visit(action.ReturnType);
+            resolver.Visit(action.Parameters.Select(p => p.Type));
         }
 
-        return resolver.GetImports(Name);
+        return resolver.GetImports();
     }
 }
 

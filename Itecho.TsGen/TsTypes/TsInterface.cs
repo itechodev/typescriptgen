@@ -52,11 +52,8 @@ public class TsInterface : TsType
     }
     public List<string> GetReferencedTypes()
     {
-        var resolver = new TsImportTypeResolver();
-        if (Extends != null)
-            resolver.Resolve(Extends);
-
-        resolver.Resolve(Members.Select(m => m.Type));
-        return resolver.GetImports(Name);
+        var resolver = new TsImportTypeResolver(this);
+        resolver.Visit(this);
+        return resolver.GetImports();
     }
 }

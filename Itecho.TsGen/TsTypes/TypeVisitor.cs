@@ -4,6 +4,15 @@ public class TypeVisitor
 {
     private List<TsType> _visisted = new();
 
+
+    public void Visit(IEnumerable<TsType> types)
+    {
+        foreach (var type in types)
+        {
+            Visit(type);
+        }
+    }
+
     public void Visit(TsType type)
     {
         // avoid infinite recursion with referencing types
