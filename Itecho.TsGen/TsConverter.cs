@@ -236,9 +236,14 @@ public static class TsConverter
         if (from is TsInterface inter)
         {
             defType.CopyFrom(inter);
+            return new TsGenericReference(defType, genericsArgs);
         }
 
-        return new TsGenericReference(defType, genericsArgs);
+        // defType is not an interface
+        // set the cache record straight
+        Cache.Remove(type);
+        Cache.Add(type, from);
+        return new TsGenericReference(from, genericsArgs);
     }
 
     private static TsType ConvertClass(Type type)
