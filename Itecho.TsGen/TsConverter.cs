@@ -243,7 +243,7 @@ public static class TsConverter
         // set the cache record straight
         Cache.Remove(type);
         Cache.Add(type, from);
-        return new TsGenericReference(from, genericsArgs);
+        return from;
     }
 
     private static TsType ConvertClass(Type type)
