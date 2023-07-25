@@ -85,7 +85,7 @@ public static class ControllerInspector
             return ActionParameterKind.Body;
 
         if (param.GetCustomAttribute<FromQueryAttribute>() != null)
-            return ActionParameterKind.Query;
+                return ActionParameterKind.Query;
 
         if (param.GetCustomAttribute<FromFormAttribute>() != null)
             return ActionParameterKind.Form;
@@ -94,7 +94,9 @@ public static class ControllerInspector
             return ActionParameterKind.Header;
 
         // the default is route
-        return ActionParameterKind.Route;
+        // if no binding are Route, Query, and Form
+        // fallback to Query
+        return ActionParameterKind.Query;
     }
 
     private static ActionParameter? PopulateParameter(ParameterInfo param)
@@ -103,15 +105,21 @@ public static class ControllerInspector
         if (param.GetCustomAttribute<FromServicesAttribute>() != null)
             return null;
 
-        return new ActionParameter(param.Name ?? "", GetKind(param), param.DefaultValue,
-            TsConverter.Convert(param.ParameterType, NullableHelper.IsNullable(param)));
+        return new ActionParameter(
+            param.Name ?? "", GetKind(param), 
+            param.DefaultValue, 
+            TsConverter.Convert(param.ParameterType, 
+            NullableHelper.IsNullable(param))
+        );
     }
 
 
     private static ActionInfo PopulateMethod(MethodInfo methodInfo)
     {
-        var route = methodInfo.GetCustomAttribute<RouteAttribute>();
-
+        // there may exists multiple routes
+        // take the first one
+        var route = methodInfo.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
+        
         return new ActionInfo()
         {
             Name = methodInfo.Name,
@@ -130,7 +138,8 @@ public static class ControllerInspector
 
     private static ControllerInfo PopulateController(Type controller)
     {
-        var route = controller.GetCustomAttribute<RouteAttribute>();
+        // multiple routes may exists, take the first one
+        var route = controller.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
         return new ControllerInfo()
         {
             Name = controller.Name, RouteTemplate = route?.Template ?? string.Empty, Actions = controller.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
