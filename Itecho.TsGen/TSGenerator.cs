@@ -1,3 +1,4 @@
+using System.Reflection;
 using Itecho.TsGen.TSExpressions;
 using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Http.Features;
@@ -6,23 +7,7 @@ namespace Itecho.TsGen;
 
 public static class TsGenerator
 {
-    private static bool IsExplicitReturn(ActionInfo action)
-    {
-        // if explicit returns is not set, then we generate all methods
-        if (!TsGenArguments.ExplicitReturns)
-            return true;
 
-        return action.ReturnType switch
-        {
-            TsVoid => false,
-            TsPrimitive prim => prim.Type != TsPrimitive.TsPrimitiveType.Any &&
-                                prim.Type != TsPrimitive.TsPrimitiveType.Undefined &&
-                                prim.Type != TsPrimitive.TsPrimitiveType.Unknown,
-
-            // anything else is considered explicit
-            _ => true
-        };
-    }
 
     public static void GenerateController(ControllerInfo controller, string outputPath)
     {
@@ -30,14 +15,7 @@ public static class TsGenerator
         {
             return;
         }
-
-        var explicitActions = controller.Actions.Where(IsExplicitReturn).ToList();
-        if (!explicitActions.Any())
-        {
-            // all actions are implicit. Nothing doing
-            return;
-        }
-
+        
         var tsFile = new TsFile();
         tsFile.Add(TsExp.Comment("eslint-disable", true));
         tsFile.Add(VersionInfo.GenerationNotice);
@@ -58,7 +36,7 @@ public static class TsGenerator
 
         tsFile.Add(TsExp.EmptyLine());
 
-        var exportEntries = explicitActions.Select(action => new DictionaryEntry(
+        var exportEntries = controller.Actions.Select(action => new DictionaryEntry(
             TsExp.Literal(FormatHelper.CamelCase(action.Name)),
             BuildControllerAction(controller, action))
         );

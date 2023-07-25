@@ -121,8 +121,25 @@ public static class ControllerInspector
         );
     }
 
+    private static bool IsExplicitReturn(TsType type)
+    {
+        // if explicit returns is not set, then we generate all methods
+        if (!TsGenArguments.ExplicitReturns)
+            return true;
 
-    private static ActionInfo PopulateMethod(MethodInfo methodInfo)
+        return type switch
+        {
+            TsVoid => false,
+            TsPrimitive prim => prim.Type != TsPrimitive.TsPrimitiveType.Any &&
+                                prim.Type != TsPrimitive.TsPrimitiveType.Undefined &&
+                                prim.Type != TsPrimitive.TsPrimitiveType.Unknown,
+
+            // anything else is considered explicit
+            _ => true
+        };
+    }
+
+    private static ActionInfo PopulateMethod(TsType returnType, MethodInfo methodInfo)
     {
         // there may exists multiple routes
         // take the first one
@@ -132,7 +149,7 @@ public static class ControllerInspector
         {
             Name = methodInfo.Name,
             RouteTemplate = route?.Template ?? "",
-            ReturnType = TsConverter.Convert(methodInfo.ReturnType),
+            ReturnType = returnType,
             ReturnTypeClr = methodInfo.ReturnType,
             Kind = PopulateMethodKind(methodInfo), Parameters = methodInfo
                 .GetParameters()
@@ -148,12 +165,27 @@ public static class ControllerInspector
     {
         // multiple routes may exists, take the first one
         var route = controller.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
+
+        var actions = controller
+            .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly |
+                        BindingFlags.InvokeMethod)
+            .Where(FilterMethod)
+            
+            // we only interested in methods that explicit returns a value
+            // don't further parse the methods arguments etc
+            .Select(methodInfo => new
+            {
+                ReturnType = TsConverter.Convert(methodInfo.ReturnType),
+                MethodInfo = methodInfo
+            })
+            .Where(m => IsExplicitReturn(m.ReturnType))
+            .Select(m => PopulateMethod(m.ReturnType, m.MethodInfo));
+        
         return new ControllerInfo()
         {
-            Name = controller.Name, RouteTemplate = route?.Template ?? string.Empty, Actions = controller
-                .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.InvokeMethod)
-                .Where(FilterMethod)
-                .Select(PopulateMethod)
+            Name = controller.Name, 
+            RouteTemplate = route?.Template ?? string.Empty, 
+            Actions = actions
                 .ToList()
         };
     }
