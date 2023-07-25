@@ -27,38 +27,54 @@ public static class RouteHelper
     private static string FormatControllerName(string name)
     {
         return "/" + (name.EndsWith("controller", StringComparison.OrdinalIgnoreCase) ? name[..^10] : name);
-
     }
 
     public static string ActionMethod(ActionKind kind)
     {
         return kind switch
         {
-            ActionKind.Post => "post", ActionKind.Get => "get", ActionKind.Patch => "patch", ActionKind.Delete => "delete", ActionKind.Put => "put", _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+            ActionKind.Post => "post", ActionKind.Get => "get", ActionKind.Patch => "patch",
+            ActionKind.Delete => "delete", ActionKind.Put => "put",
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
     }
 
+
+    private static string RoutePlaceHolders(string route, string controller, string action)
+    {
+        // replace common conventional placeholders
+        // attribute routing, you define placeholders by using {...} syntax instead of square brackets.
+        route = route.Replace("[controller]", controller);
+        route = route.Replace("[action]", action);
+
+        route = route.Replace("{controller}", controller);
+        route = route.Replace("{action}", action);
+
+        return route;
+    }
 
     private static string GetUrl(ControllerInfo controller, ActionInfo action)
     {
         if (!string.IsNullOrEmpty(action.RouteTemplate))
         {
             if (action.RouteTemplate.StartsWith("/"))
-                return action.RouteTemplate;
+                return RoutePlaceHolders(action.RouteTemplate, controller.Name, action.Name);
 
             // when using route attributes on both the controller and actions, the routes is combined
-            return controller.RouteTemplate + action.RouteTemplate;
+            return RoutePlaceHolders(controller.RouteTemplate + action.RouteTemplate, controller.Name, action.Name);
         }
 
         if (!string.IsNullOrEmpty(controller.RouteTemplate))
         {
-            return controller.RouteTemplate + "/" + action.Name;
+            return RoutePlaceHolders(controller.RouteTemplate + "/" + action.Name, controller.Name, action.Name);
         }
 
         // fallback to the default route controller/action
-        return FormatControllerName(controller.Name) + "/" + action.Name;
+        return RoutePlaceHolders(FormatControllerName(controller.Name) + "/" + action.Name, controller.Name,
+            action.Name);
     }
 
+    private static readonly Regex Extract = new(@"\{.*\}");
 
     // Takes in a route with segments, FarmController/{id}
     // And converts to a JS interpolated string
@@ -76,8 +92,7 @@ public static class RouteHelper
 
         // extract all {.} pairs from the URL
         // then replace it with route parameter
-        var extract = new Regex(@"\{.*\}");
-        var matches = extract.Matches(url);
+        var matches = Extract.Matches(url);
 
         // there are routes defined, but pair in URL does not match
         // example: [HttpGet] public Response Method(int param1). param1 is considered a route parameter, but no route defined
