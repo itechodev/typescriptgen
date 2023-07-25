@@ -102,8 +102,8 @@ public static class TsConverter
     {
         var names = Enum.GetNames(type);
         // the underlying type for all enums are numeric
-        var values = Enum.GetValues(type).Cast<int>();
-        var options = names.Zip(values).ToDictionary(t => t.First, t => t.Second);
+        // var values = Enum.GetValues(type).Cast<int>();
+        var options = names.ToDictionary(t => t, t => System.Convert.ToInt32(Enum.Parse(type, t)));
         // for now all enums are strings
         return new TsEnum(type.Name, TsEnum.TsEnumValueType.String, options);
     }
@@ -143,7 +143,11 @@ public static class TsConverter
 
         if (type.IsEnumerable())
         {
-            return new TsArray(Convert(type.GetGenericArguments()[0]));
+            var args = type.GetGenericArguments();
+            if (args.Length != 1)
+                return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
+            
+            return new TsArray(Convert(args[0]));
         }
 
 
