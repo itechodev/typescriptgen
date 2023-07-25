@@ -26,7 +26,11 @@ public class ControllerInfo
 
 public enum ActionKind
 {
-    Post, Get, Patch, Delete, Put
+    Post,
+    Get,
+    Patch,
+    Delete,
+    Put
 }
 
 public class ActionInfo
@@ -41,7 +45,11 @@ public class ActionInfo
 
 public enum ActionParameterKind
 {
-    Route, Body, Query, Form, Header
+    Route,
+    Body,
+    Query,
+    Form,
+    Header
 }
 
 public class ActionParameter
@@ -85,7 +93,7 @@ public static class ControllerInspector
             return ActionParameterKind.Body;
 
         if (param.GetCustomAttribute<FromQueryAttribute>() != null)
-                return ActionParameterKind.Query;
+            return ActionParameterKind.Query;
 
         if (param.GetCustomAttribute<FromFormAttribute>() != null)
             return ActionParameterKind.Form;
@@ -106,10 +114,10 @@ public static class ControllerInspector
             return null;
 
         return new ActionParameter(
-            param.Name ?? "", GetKind(param), 
-            param.DefaultValue, 
-            TsConverter.Convert(param.ParameterType, 
-            NullableHelper.IsNullable(param))
+            param.Name ?? "", GetKind(param),
+            param.DefaultValue,
+            TsConverter.Convert(param.ParameterType,
+                NullableHelper.IsNullable(param))
         );
     }
 
@@ -119,7 +127,7 @@ public static class ControllerInspector
         // there may exists multiple routes
         // take the first one
         var route = methodInfo.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
-        
+
         return new ActionInfo()
         {
             Name = methodInfo.Name,
@@ -142,7 +150,8 @@ public static class ControllerInspector
         var route = controller.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
         return new ControllerInfo()
         {
-            Name = controller.Name, RouteTemplate = route?.Template ?? string.Empty, Actions = controller.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+            Name = controller.Name, RouteTemplate = route?.Template ?? string.Empty, Actions = controller
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                 .Select(PopulateMethod)
                 .ToList()
         };
@@ -152,9 +161,9 @@ public static class ControllerInspector
     {
         return assembly
             .GetExportedTypes()
-            .Where(t => (typeof(Controller).IsAssignableFrom(t) || typeof(ControllerBase).IsAssignableFrom(t)) && !TsGenArguments.Ignore.Contains(t.Name.ToLower()))
+            .Where(t => (typeof(Controller).IsAssignableFrom(t) || typeof(ControllerBase).IsAssignableFrom(t)) &&
+                        !TsGenArguments.Ignore.Contains(t.Name.ToLower()))
             .Select(PopulateController)
-                .ToList();
+            .ToList();
     }
-
 }
