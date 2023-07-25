@@ -112,7 +112,7 @@ public static class TsConverter
     {
         // controllers returning generic object or ActionResult<T> will be converted to unknown in TS
         // unknown almost better than any as you need safeguards before accessing   
-        if (type == typeof(object) || type == typeof(ActionResult))
+        if (type == typeof(object) || type == typeof(ActionResult) || type == typeof(Task))
             return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
         // convert IFormFile to File in TS, which is build in
@@ -189,6 +189,14 @@ public static class TsConverter
             return new TsTuple(type.GenericTypeArguments.Select(g => Convert(g)).ToArray());
         }
 
+        if (def == typeof(Task<>))
+        {
+            if (type.GenericTypeArguments.Length == 0)
+                return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
+
+            return Convert(type.GenericTypeArguments[0]);
+        }
+        
         if (def == typeof(ActionResult<>))
         {
             if (type.GenericTypeArguments.Length == 0)
