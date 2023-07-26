@@ -170,7 +170,9 @@ public static class TsGenerator
         var tsFile = new TsFile();
         tsFile.Add(VersionInfo.GenerationNotice);
         tsFile.Add(TsExp.EmptyLine());
-        tsFile.Add(TsExp.DefaultExport(TsExp.Enum(@enum)));
+        tsFile.Add(TsExp.Enum(@enum));
+        tsFile.Add(TsExp.EmptyLine());
+        tsFile.Add(TsExp.DefaultExport(TsExp.Literal(@enum.Name)));
         tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.InterfacesFolder, FormatHelper.CamelCase(@enum.Name)));
     }
 }
