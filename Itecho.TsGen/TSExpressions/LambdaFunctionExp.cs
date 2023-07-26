@@ -20,6 +20,19 @@ public class LambdaFunctionExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
+        var genericResolver = new TsGenericTypeResolver();
+        if (ReturnType != null)
+            genericResolver.Visit(ReturnType);
+        foreach (var param in Parameters)
+            genericResolver.Visit(param.Type);
+
+        if (genericResolver.List.Any())
+        {
+            gen.Write("<");
+            gen.Write(string.Join(", ", genericResolver.List));
+            gen.Write(">");   
+        }
+
         // (p: number)?: returnType => "";
         gen.Write("(");
         if (Parameters.Any())
@@ -44,7 +57,7 @@ public class LambdaFunctionExp : TsExp
         if (Block is ReturnExp ret)
         {
             ret.Expression.Write(gen);
-        } 
+        }
         else Block.Write(gen);
     }
 }
