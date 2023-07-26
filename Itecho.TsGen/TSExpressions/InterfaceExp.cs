@@ -19,9 +19,9 @@ public class InterfaceExp : TsExp
             gen.Write($"<{string.Join(", ", Interface.Generics.Select(g => g.Name))}>");
         }
 
-        if (@Interface.Extends != null)
+        if (@Interface.Extends.Any())
         {
-            gen.Write($"extends {@Interface.Extends.Name}", true);
+            gen.Write($"extends {string.Join(", ",@Interface.Extends.Select(e => e.Name))}", true);
         }
 
         gen.Block(() => {

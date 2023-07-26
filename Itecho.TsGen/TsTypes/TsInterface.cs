@@ -24,14 +24,14 @@ public class TsInterface : TsType
 
     public string Name { get; private set; }
     public TsInterfaceMember[] Members { get; private set; }
-    public TsInterface? Extends { get; private set; }
+    public TsInterface[] Extends { get; private set; }
     public TsGeneric[] Generics { get; private set; }
 
     public TsInterface()
     {
         Name = string.Empty;
         Members = Array.Empty<TsInterfaceMember>();
-        Extends = null;
+        Extends = Array.Empty<TsInterface>();
         Generics = Array.Empty<TsGeneric>();
     }
 
@@ -43,7 +43,7 @@ public class TsInterface : TsType
         Generics = other.Generics;
     }
 
-    public TsInterface(string name, TsInterfaceMember[] members, TsInterface? extends, TsGeneric[] generics)
+    public TsInterface(string name, TsInterfaceMember[] members, TsInterface[] extends, TsGeneric[] generics)
     {
         Name = name;
         Members = members;

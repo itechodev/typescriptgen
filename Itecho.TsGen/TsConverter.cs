@@ -112,7 +112,8 @@ public static class TsConverter
     {
         // controllers returning generic object or ActionResult<T> will be converted to unknown in TS
         // unknown almost better than any as you need safeguards before accessing   
-        if (type == typeof(object) || type == typeof(ActionResult) || type == typeof(IActionResult) || type == typeof(Task))
+        if (type == typeof(object) || type == typeof(ActionResult) || type == typeof(IActionResult) ||
+            type == typeof(Task))
             return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
         // convert IFormFile to File in TS, which is build in
@@ -146,7 +147,7 @@ public static class TsConverter
             var args = type.GetGenericArguments();
             if (args.Length != 1)
                 return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
-            
+
             return new TsArray(Convert(args[0]));
         }
 
@@ -196,7 +197,7 @@ public static class TsConverter
 
             return Convert(type.GenericTypeArguments[0]);
         }
-        
+
         if (def == typeof(ActionResult<>))
         {
             if (type.GenericTypeArguments.Length == 0)
@@ -244,14 +245,18 @@ public static class TsConverter
     {
         var ret = AddEmptyInterface(type);
 
-        var extends = type.BaseType != null && type.BaseType != typeof(object)
-            ? Convert(type.BaseType)
-            : null;
+        var extends = type.GetInterfaces()
+            .Select(t => Convert(t))
+            .ToList();
+
+        if (type.BaseType != null && type.BaseType != typeof(object))
+        {
+            extends.Add(Convert(type.BaseType));
+        }
 
         var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
             .Select(p =>
             {
-                
                 var name = GetCustomPropertyName(p) ?? p.Name;
                 return new TsInterface.TsInterfaceMember(name, Convert(p.PropertyType, NullableHelper.IsNullable(p)));
             })
@@ -263,7 +268,7 @@ public static class TsConverter
             .ToArray();
 
         // copy values to keep the same reference
-        ret.CopyFrom(new TsInterface(FormatName(type.Name), members, extends as TsInterface, generics));
+        ret.CopyFrom(new TsInterface(FormatName(type.Name), members, extends.OfType<TsInterface>().ToArray(), generics));
         // dont call setCache here, it's already added to the caches
         return ret;
     }
