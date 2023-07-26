@@ -47,4 +47,5 @@ public abstract class TsExp
     public static AssignExp Assign(TsExp name, TsExp value) => new(name, value);
     public static LiteralExp Literal(string value) => new(value);
     public static ObjectAccessExp ObjectAccess(TsExp exp, string member) => new(exp, member);
+    public static EnumExp Enum(TsEnum @enum) => new(@enum);
 }

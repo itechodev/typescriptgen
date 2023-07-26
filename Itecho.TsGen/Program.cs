@@ -56,13 +56,19 @@ public static class Program
         var controllers = ControllerInspector.Inspect(assembly);
 
         var interfaces = TsConverter.Cache.Values
-            .OfType<TsInterface>()
-            .ToList();
-
-        // generate interfaces per file
+            .OfType<TsInterface>();
+        // generate interfaces per fil
         foreach (var @interface in interfaces)
         {
             TsGenerator.GenerateInterface(@interface, outputPath);
+        }
+
+        var enums = TsConverter.Cache.Values
+            .OfType<TsEnum>();
+        
+        foreach (var @enum in enums)
+        {
+            TsGenerator.GenerateEnum(@enum, outputPath);
         }
 
         foreach (var controller in controllers)

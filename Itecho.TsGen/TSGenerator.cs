@@ -165,4 +165,12 @@ public static class TsGenerator
         
         tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.InterfacesFolder, FormatHelper.CamelCase(@interface.Name)));
     }
+    public static void GenerateEnum(TsEnum @enum, string outputPath)
+    {
+        var tsFile = new TsFile();
+        tsFile.Add(VersionInfo.GenerationNotice);
+        tsFile.Add(TsExp.EmptyLine());
+        tsFile.Add(TsExp.DefaultExport(TsExp.Enum(@enum)));
+        tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.InterfacesFolder, FormatHelper.CamelCase(@enum.Name)));
+    }
 }
