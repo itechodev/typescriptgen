@@ -69,6 +69,11 @@ public static class TsGenerator
         AddBody(options, action);
         AddQueryParams(options, action);
         AddHeaders(options, action);
+        
+        if (action.Parameters.Any(p => p.Kind == ActionParameterKind.Form) )
+        {
+            options.Add(new DictionaryEntry(TsExp.Literal("binding"), TsExp.Literal("form")));
+        }
 
         var clientParams = new List<TsExp>()
         {

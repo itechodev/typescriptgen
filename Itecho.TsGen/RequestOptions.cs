@@ -13,7 +13,9 @@ public static class RequestOptions
         file.Add(TsExp.Literal(@"
 export interface RequestOptions {
     method?: 'get' | 'post' | 'put' | 'patch' | 'delete';
-    body?: object | FormData;
+    body?: object;
+    // the binding of the body object representing [FromBody] and [FromForm] in C#
+    binding?: 'body' | 'form';
     queryParams?: Record<string, unknown>;
     headers?: Record<string, unknown>;
 }"));
