@@ -79,7 +79,7 @@ public static class Program
         // generate the general http handler
         RequestOptions.Generate().WriteToFile(Path.Combine(outputPath, "requestOptions"));
         // and the http concrete handler for the user to change
-        var requestPath = Path.Combine(outputPath, "request");
+        var requestPath = Path.Combine(outputPath, "request.ts");
         if (!File.Exists(requestPath))
         {
             HttpMakeRequestFile.Generate().WriteToFile(requestPath);

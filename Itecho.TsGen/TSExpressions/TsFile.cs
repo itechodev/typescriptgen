@@ -18,6 +18,10 @@ public class TsFile
             exp.Write(gen);
         }
 
-        gen.WriteToFile(fileName + ".ts");
+        var tsFileName = fileName.EndsWith(".ts") 
+            ? fileName 
+            : fileName + ".ts";
+        
+        gen.WriteToFile(tsFileName);
     }
 }
