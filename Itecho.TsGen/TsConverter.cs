@@ -220,7 +220,6 @@ public static class TsConverter
         }
 
 
-        var defType = AddEmptyInterface(type);
         // if type is a generic ie: PaginationResponse<Dog>
         // then we need to convert PaginationResponse<T> and Dog
         // and return the reference to PaginationResponse with filled generic Dog.
@@ -230,20 +229,15 @@ public static class TsConverter
             .Select(p => p.IsGenericParameter ? new TsGeneric(p.Name) : Convert(p))
             .ToArray();
 
-        // type.GetGenericTypeDefinition() == PaginationResponse`1
-        // type.GetGenericTypeDefinition().GetGenericArguments() == [T]
         var from = Convert(def);
-        if (from is TsInterface inter)
+        if (from is TsInterface)
         {
-            defType.CopyFrom(inter);
-            return new TsGenericReference(defType, genericsArgs);
+            return new TsGenericReference(from, genericsArgs);
         }
 
         // defType is not an interface
-        // set the cache record straight
-        Cache.Remove(type);
-        Cache.Add(type, from);
-        return from;
+        // we cannot have a generic reference to a non interface type
+        return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
     }
 
     private static TsType ConvertClass(Type type)

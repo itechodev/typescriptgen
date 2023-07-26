@@ -25,7 +25,7 @@ public class TsImportTypeResolver : TypeVisitor
 
     protected override void VisitInterface(TsInterface @interface)
     {
-        if (_originalInterface != @interface && !_list.Contains(@interface.Name))
+        if (_originalInterface != @interface)
             _list.Add(@interface.Name);
 
         base.VisitInterface(@interface);
