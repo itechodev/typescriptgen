@@ -20,14 +20,19 @@ public class TsImportTypeResolver : TypeVisitor
     protected override void VisitEnum(TsEnum @enum)
     {
         _list.Add(@enum.Name);
-        base.VisitEnum(@enum);
     }
 
     protected override void VisitInterface(TsInterface @interface)
     {
-        if (_originalInterface != @interface)
+        if (_originalInterface == @interface)
+        {
+            base.VisitInterface(@interface);
+        }
+        else
+        {
+            // do not recurse
+            // only interested in top level imports
             _list.Add(@interface.Name);
-
-        base.VisitInterface(@interface);
+        }
     }
 }

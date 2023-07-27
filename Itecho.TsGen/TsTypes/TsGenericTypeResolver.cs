@@ -11,4 +11,13 @@ public class TsGenericTypeResolver : TypeVisitor
             
         base.VisitGeneric(generic);
     }
+
+    protected override void VisitInterface(TsInterface @interface)
+    {
+        // only interested in top level generics
+        foreach (var g in @interface.Generics)
+        {
+            Visit(g);
+        }
+    }
 }

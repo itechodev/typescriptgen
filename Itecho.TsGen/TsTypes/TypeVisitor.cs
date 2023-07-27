@@ -120,10 +120,7 @@ public class TypeVisitor
 
     protected virtual void VisitInterface(TsInterface @interface)
     {
-        if (@interface.Extends != null)
-        {
-            Visit(@interface.Extends);
-        }
+        Visit(@interface.Extends);
 
         foreach (var g in @interface.Generics)
         {
