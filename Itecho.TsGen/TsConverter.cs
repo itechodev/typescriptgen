@@ -151,10 +151,15 @@ public static class TsConverter
             return new TsArray(Convert(args[0]));
         }
 
-
         if (type.IsGenericType && type != type.GetGenericTypeDefinition())
         {
             return ConvertGeneric(type);
+        }
+
+        // ignore all types defined in .NET common runtime
+        if (IsInCommonAssembly(type))
+        {
+            return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);    
         }
 
         if (type.IsClass || type.IsInterface)
@@ -163,6 +168,16 @@ public static class TsConverter
         }
 
         return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
+    }
+    private static bool IsInCommonAssembly(Type type)
+    {
+        // Get the assembly's fully qualified name
+        var assemblyName = type.Assembly.FullName ?? string.Empty; 
+
+        // Built-in assemblies generally start with "System", "Microsoft", or "mscorlib"
+        return assemblyName.StartsWith("System") 
+               || assemblyName.StartsWith("Microsoft") 
+               || assemblyName.StartsWith("mscorlib");
     }
 
     /// <summary>

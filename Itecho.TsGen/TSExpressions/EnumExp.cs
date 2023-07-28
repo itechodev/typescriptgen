@@ -39,7 +39,7 @@ public class EnumExp : TsExp
         }
         else
         {
-            gen.Write("\"" + key.Value + "\"", true);
+            gen.Write("\"" + key.Key + "\"", true);
         }
     }
 }
