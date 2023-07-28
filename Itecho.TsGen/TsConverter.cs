@@ -105,7 +105,7 @@ public static class TsConverter
         // var values = Enum.GetValues(type).Cast<int>();
         var options = names.ToDictionary(t => t, t => System.Convert.ToInt32(Enum.Parse(type, t)));
         // for now all enums are strings
-        return new TsEnum(type.Name, TsEnum.TsEnumValueType.Number, options);
+        return new TsEnum(type.Name, TsGenArguments.EnumValueType, options);
     }
 
     private static TsType ConvertNonPrimitive(Type type)

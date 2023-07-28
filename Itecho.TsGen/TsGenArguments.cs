@@ -1,3 +1,5 @@
+using Itecho.TsGen.TsTypes;
+
 namespace Itecho.TsGen;
 
 public static class TsGenArguments
@@ -7,4 +9,6 @@ public static class TsGenArguments
 
     public static string ControllerFolder { get; set; } = "controllers";
     public static string InterfacesFolder { get; set; } = "interfaces";
+    
+    public static TsEnum.TsEnumValueType EnumValueType { get; set; } = TsEnum.TsEnumValueType.String;
 }

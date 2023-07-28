@@ -20,6 +20,7 @@ public static class Program
             Console.WriteLine("-ignore controllerName1 controllerName2 = ignore controller that matches these names;");
             Console.WriteLine(
                 "-explicitReturns = only generate methods that explicit returns a value. Discard generic ActionResult returns.");
+            Console.WriteLine("-enum [string|number] = Generate enum value as string or number ");
         }
 
         var list = ProcessArguments.Process(args.Skip(2));
@@ -32,6 +33,9 @@ public static class Program
                     break;
                 case "explicitReturns":
                     TsGenArguments.ExplicitReturns = true;
+                    break;
+                case "enum":
+                    TsGenArguments.EnumValueType = arg.Value.Contains("string") ? TsEnum.TsEnumValueType.String : TsEnum.TsEnumValueType.Number;
                     break;
             }
         }
