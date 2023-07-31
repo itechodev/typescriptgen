@@ -10,6 +10,6 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>itecho.tsgen</ToolCommandName>
         <PackageOutputPath>./nupkg</PackageOutputPath>
-        <Version>1.0.9</Version>
+        <Version>1.0.10</Version>
     </PropertyGroup>
 </Project>
