@@ -269,7 +269,10 @@ public static class TsConverter
             extends.Add(Convert(type.BaseType));
         }
 
-        var members = type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
+        var members = type
+            .GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
+            // filter out index properties
+            .Where(p => p.GetIndexParameters().Length == 0)
             .Select(p =>
             {
                 var name = GetCustomPropertyName(p) ?? p.Name;
