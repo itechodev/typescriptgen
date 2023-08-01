@@ -121,7 +121,7 @@ public static class TsGenerator
         // QueryParams: {...request};
         if (g.Type is TsInterface)
         {
-            return TsExp.Literal("..." + g.Name);
+            return TsExp.Spread(TsExp.Literal(g.Name));
         }
         // queryParams: { name: name };
         return TsExp.Literal(g.Name);
