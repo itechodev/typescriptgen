@@ -15,7 +15,7 @@ public static class TsGenerator
         {
             return;
         }
-        
+
         var tsFile = new TsFile();
         tsFile.Add(TsExp.Comment("eslint-disable", true));
         tsFile.Add(VersionInfo.GenerationNotice);
@@ -58,9 +58,6 @@ public static class TsGenerator
             headers?: Record<string, unknown>;
         }
         */
-
-        // var returnType = TsType.GenericReference(TsType.BuildIn("Promise"), action.ReturnType);
-
         var paramList = action.Parameters.Select(p =>
             new TsParameter(p.Name, p.Type));
 
@@ -69,8 +66,8 @@ public static class TsGenerator
         AddBody(options, action);
         AddQueryParams(options, action);
         AddHeaders(options, action);
-        
-        if (action.Parameters.Any(p => p.Kind == ActionParameterKind.Form) )
+
+        if (action.Parameters.Any(p => p.Kind == ActionParameterKind.Form))
         {
             options.Add(new DictionaryEntry(TsExp.Literal("binding"), TsExp.Literal("form")));
         }
@@ -83,7 +80,6 @@ public static class TsGenerator
         {
             clientParams.Add(TsExp.Dictionary(options));
         }
-
         // If file is returned from GET action
         // only return the url tha will download the file
         // so that it can be freely used in different downloading options
@@ -119,12 +115,24 @@ public static class TsGenerator
         }
     }
 
+    private static TsExp QueryParamExpression(ActionParameter g)
+    {
+        // [FromQuery] is a object
+        // QueryParams: {...request};
+        if (g.Type is TsInterface)
+        {
+            return TsExp.Literal("..." + g.Name);
+        }
+        // queryParams: { name: name };
+        return TsExp.Literal(g.Name);
+    }
+
     private static void AddQueryParams(List<DictionaryEntry> options, ActionInfo action)
     {
         // handle [FromQuery}
         var queryParams = action.Parameters
             .Where(p => p.Kind == ActionParameterKind.Query)
-            .Select(g => new DictionaryEntry(TsExp.Literal(g.Name)))
+            .Select(g => new DictionaryEntry(QueryParamExpression(g)))
             .ToList();
         if (queryParams.Any())
         {
@@ -167,7 +175,7 @@ public static class TsGenerator
 
         tsFile.Add(TsExp.EmptyLine());
         tsFile.Add(TsExp.DefaultExport(TsExp.Interface(@interface)));
-        
+
         tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.InterfacesFolder, FormatHelper.CamelCase(@interface.Name)));
     }
     public static void GenerateEnum(TsEnum @enum, string outputPath)
