@@ -30,7 +30,7 @@ public class DictionaryExp : TsExp
     public override void Write(TsCodeGenerator gen)
     {
         gen.Block(() => {
-            foreach (var entry in Entries)
+            foreach (var (entry, index) in Entries.WithIndex())
             {
                 entry.Key.Write(gen);
                 if (entry.Key != entry.Value)
@@ -38,8 +38,12 @@ public class DictionaryExp : TsExp
                     gen.Write(": ");
                     entry.Value.Write(gen);
                 }
-                gen.Write(",");
-                gen.NewLine();
+
+                if (index < Entries.Count() - 1)
+                {
+                    gen.Write(",");
+                    gen.NewLine();
+                }
             }
         });
     }
