@@ -24,22 +24,8 @@ public static class Program
         }
 
         var list = ProcessArguments.Process(args.Skip(2));
-        foreach (var arg in list)
-        {
-            switch (arg.Name)
-            {
-                case "ignore":
-                    TsGenArguments.Ignore = arg.Value.Select(f => f.ToLower()).ToList();
-                    break;
-                case "explicitReturns":
-                    TsGenArguments.ExplicitReturns = true;
-                    break;
-                case "enum":
-                    TsGenArguments.EnumValueType = arg.Value.Contains("string") ? TsEnum.TsEnumValueType.String : TsEnum.TsEnumValueType.Number;
-                    break;
-            }
-        }
-
+        TsGenArguments.Fill(list);
+        
         var assemblyPath = Path.GetFullPath(args[0]);
         var outputPath = Path.GetFullPath(args[1]);
         Console.WriteLine("Inspecting assembly: " + assemblyPath);

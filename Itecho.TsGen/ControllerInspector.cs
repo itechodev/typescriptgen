@@ -129,7 +129,7 @@ public static class ControllerInspector
 
         return type switch
         {
-            TsVoid => false,
+            TsVoid => TsGenArguments.GenerateVoidReturn,
             TsPrimitive prim => prim.Type != TsPrimitive.TsPrimitiveType.Any &&
                                 prim.Type != TsPrimitive.TsPrimitiveType.Undefined &&
                                 prim.Type != TsPrimitive.TsPrimitiveType.Unknown,

@@ -66,6 +66,11 @@ public static class TsConverter
             return ConvertEnum(type);
         }
 
+        if (type == typeof(void))
+        {
+            return new TsVoid();
+        }
+
         switch (Type.GetTypeCode(type))
         {
             case TypeCode.Object:
