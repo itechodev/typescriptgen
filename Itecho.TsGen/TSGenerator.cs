@@ -31,7 +31,7 @@ public static class TsGenerator
         // import all references for this controller
         foreach (var import in controller.GetReferencedTypes())
         {
-            tsFile.Add(TsExp.Import($"../{TsGenArguments.InterfacesFolder}/{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
+            tsFile.Add(TsExp.Import($"../{TsGenArguments.InterfacesFolder}/{FormatHelper.CamelCase(import.Name)}", new ImportExp.NamedImport(import.Name, true)));
             tsFile.Add(TsExp.EmptyLine());
         }
 
@@ -170,8 +170,14 @@ public static class TsGenerator
         // import all interfaces referenced by this interface
         foreach (var import in @interface.GetReferencedTypes())
         {
-            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
-            tsFile.Add(TsExp.EmptyLine());
+            var createImport = import.IsInterface 
+                ? new [] { new ImportExp.NamedImport("create" + import.Name, false) } 
+                : Array.Empty<ImportExp.NamedImport>();
+
+            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import.Name)}",
+                new ImportExp.NamedImport(import.Name, import.IsInterface),
+                createImport
+            ));
         }
 
         tsFile.Add(TsExp.EmptyLine());
@@ -180,7 +186,7 @@ public static class TsGenerator
         if (TsGenArguments.GenerateFactories)
         {
             tsFile.Add(TsExp.EmptyLine());
-            tsFile.Add(TsExp.NamedExport(TsExp.FunctionDef("create" + @interface.Name, TsType.Primitive(TsPrimitive.TsPrimitiveType.Boolean), ArraySegment<TsParameter>.Empty,
+            tsFile.Add(TsExp.NamedExport(TsExp.FunctionDef("create" + @interface.Name, @interface, ArraySegment<TsParameter>.Empty,
                 BuildFactoryMethod(@interface)
             )));
         }
@@ -192,6 +198,7 @@ public static class TsGenerator
     {
         var entries = @interface.Members.Select(member => new DictionaryEntry(
             TsExp.Literal(FormatHelper.CamelCase(member.Name)), CreateType(member.Type)));
+        
 
         return TsExp.Block(
             TsExp.Return(
@@ -241,7 +248,7 @@ public static class TsGenerator
 
                 return TsExp.Literal("{}");
             case TsEnum tsEnum:
-                return TsExp.Literal(tsEnum.Values.Keys.First());
+                return TsExp.ObjectAccess(TsExp.Literal(tsEnum.Name), tsEnum.Values.Keys.First());
             case TsGenericReference tsGenericReference:
                 return CreateType(tsGenericReference.ReferencedType);
             case TsInterface @interface:

@@ -10,7 +10,7 @@ public class ControllerInfo
     public string RouteTemplate { get; set; } = string.Empty;
     public List<ActionInfo> Actions { get; set; } = new();
 
-    public List<string> GetReferencedTypes()
+    public List<TsImportTypeResolverItem> GetReferencedTypes()
     {
         var resolver = new TsImportTypeResolver(null);
 
