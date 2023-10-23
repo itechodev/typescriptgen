@@ -176,8 +176,80 @@ public static class TsGenerator
         tsFile.Add(TsExp.EmptyLine());
         tsFile.Add(TsExp.DefaultExport(TsExp.Interface(@interface)));
 
+        if (TsGenArguments.GenerateFactories)
+        {
+            tsFile.Add(TsExp.EmptyLine());
+            tsFile.Add(TsExp.NamedExport(TsExp.FunctionDef("create" + @interface.Name, TsType.Primitive(TsPrimitive.TsPrimitiveType.Boolean), ArraySegment<TsParameter>.Empty,
+                BuildFactoryMethod(@interface)
+            )));
+        }
+
         tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.InterfacesFolder, FormatHelper.CamelCase(@interface.Name)));
     }
+
+    private static TsBlockExp BuildFactoryMethod(TsInterface @interface)
+    {
+        var entries = @interface.Members.Select(member => new DictionaryEntry(
+            TsExp.Literal(FormatHelper.CamelCase(member.Name)), CreateType(member.Type)));
+
+        return TsExp.Block(
+            TsExp.Return(
+                TsExp.Dictionary(entries)
+            )
+        );
+    }
+    private static TsExp CreateType(TsType type)
+    {
+        switch (type)
+        {
+            case TsArray tsArray:
+                return TsExp.Array(Array.Empty<TsExp>());
+            case TsBuildInType tsBuildInType:
+                return TsExp.Literal("new File([\"\"], \"empty.txt\", { type: \"text/plain\" });");
+            // case TsIntersection tsIntersection:
+            //     break;
+            // case TsTuple tsTuple:
+            //     break;
+            // case TsUnion tsUnion:
+            //     break;
+            // case TsCompositeType tsCompositeType:
+            //     break;
+            // case TsDictionary tsDictionary:
+            //     return TsExp.Dictionary(new DictionaryEntry[]
+            //     {
+            //         new DictionaryEntry()
+            //     });
+            // case TsEnum tsEnum:
+            //     break;
+            // case TsGeneric tsGeneric:
+            //     break;
+            // case TsGenericReference tsGenericReference:
+            //     break;
+            case TsInterface @interface:
+                return TsExp.FunctionCall(TsExp.Literal("create" + @interface.Name), null);
+            case TsPrimitive tsPrimitive:
+                switch (tsPrimitive.Type)
+                {
+                    case TsPrimitive.TsPrimitiveType.Null:
+                        return TsExp.Literal("null");
+                    case TsPrimitive.TsPrimitiveType.String:
+                        return TsExp.String("");
+                    case TsPrimitive.TsPrimitiveType.Number:
+                        return TsExp.Literal("0");
+                    case TsPrimitive.TsPrimitiveType.Boolean:
+                        return TsExp.Literal("false");
+                    case TsPrimitive.TsPrimitiveType.Date:
+                        return TsExp.Literal("new Date()");
+                    case TsPrimitive.TsPrimitiveType.Undefined:
+                    case TsPrimitive.TsPrimitiveType.Unknown:
+                    case TsPrimitive.TsPrimitiveType.Any:
+                    default:
+                        return TsExp.Literal("undefined");
+                }
+        }
+        return TsExp.Literal("null!");
+    }
+
     public static void GenerateEnum(TsEnum @enum, string outputPath)
     {
         var tsFile = new TsFile();
