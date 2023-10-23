@@ -26,7 +26,7 @@ public static class RouteHelper
 
     private static string FormatControllerName(string name)
     {
-        return "/" + (name.EndsWith("controller", StringComparison.OrdinalIgnoreCase) ? name[..^10] : name);
+        return name.EndsWith("controller", StringComparison.OrdinalIgnoreCase) ? name[..^10] : name;
     }
 
     public static string ActionMethod(ActionKind kind)
@@ -58,20 +58,19 @@ public static class RouteHelper
         if (!string.IsNullOrEmpty(action.RouteTemplate))
         {
             if (action.RouteTemplate.StartsWith("/"))
-                return RoutePlaceHolders(action.RouteTemplate, controller.Name, action.Name);
+                return RoutePlaceHolders(action.RouteTemplate, FormatControllerName(controller.Name), action.Name);
 
             // when using route attributes on both the controller and actions, the routes is combined
-            return RoutePlaceHolders(controller.RouteTemplate + action.RouteTemplate, controller.Name, action.Name);
+            return RoutePlaceHolders(controller.RouteTemplate + action.RouteTemplate, FormatControllerName(controller.Name), action.Name);
         }
 
         if (!string.IsNullOrEmpty(controller.RouteTemplate))
         {
-            return RoutePlaceHolders(controller.RouteTemplate + "/" + action.Name, controller.Name, action.Name);
+            return RoutePlaceHolders(controller.RouteTemplate, FormatControllerName(controller.Name), action.Name);
         }
-
+        
         // fallback to the default route controller/action
-        return RoutePlaceHolders(FormatControllerName(controller.Name) + "/" + action.Name, controller.Name,
-            action.Name);
+        return RoutePlaceHolders(TsGenArguments.DefaultPattern, FormatControllerName(controller.Name), action.Name);
     }
 
     private static readonly Regex Extract = new(@"\{.*\}");

@@ -8,7 +8,7 @@ public static class HttpMakeRequestFile
     {
         var file = new TsFile();
 
-        file.Add(TsExp.Literal(@"import {type RequestOptions} from './requestOptions';
+        file.Add(TsExp.Literal(@"import type {RequestOptions} from './requestOptions';
 
 //  (url: string, options?: HttpOptions) => Promise<T>;
 export function webRequest<T>(url: string, options?: RequestOptions): Promise<T> {
