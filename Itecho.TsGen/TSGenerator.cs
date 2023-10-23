@@ -26,7 +26,6 @@ public static class TsGenerator
         tsFile.Add(TsExp.Import("../request", null,
             new ImportExp.NamedImport("webRequest", false),
             new ImportExp.NamedImport("fileRequest", false)));
-        tsFile.Add(TsExp.EmptyLine());
 
         // import all references for this controller
         foreach (var import in controller.GetReferencedTypes())
@@ -169,7 +168,7 @@ public static class TsGenerator
         // import all interfaces referenced by this interface
         foreach (var import in @interface.GetReferencedTypes())
         {
-            var createImport = import.IsInterface 
+            var createImport = TsGenArguments.GenerateFactories && import.IsInterface  
                 ? new [] { new ImportExp.NamedImport("create" + import.Name, false) } 
                 : Array.Empty<ImportExp.NamedImport>();
 

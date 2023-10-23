@@ -16,7 +16,7 @@ public static class TsGenArguments
     /// <summary>
     /// Generate factories for interfaces being generated
     /// </summary>
-    public static bool GenerateFactories { get; set; } = true;
+    public static bool GenerateFactories { get; set; }
     
     public static TsEnum.TsEnumValueType EnumValueType { get; set; } = TsEnum.TsEnumValueType.String;
 
@@ -26,6 +26,9 @@ public static class TsGenArguments
         {
             switch (arg.Name)
             {
+                case "factories":
+                    GenerateFactories = true;
+                    break;
                 case "disableVoidReturns":
                     GenerateVoidReturn = false;
                     break;
