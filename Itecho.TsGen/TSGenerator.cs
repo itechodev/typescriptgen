@@ -69,7 +69,7 @@ public static class TsGenerator
 
         if (action.Parameters.Any(p => p.Kind == ActionParameterKind.Form))
         {
-            options.Add(new DictionaryEntry(TsExp.Literal("binding"), TsExp.Literal("form")));
+            options.Add(new DictionaryEntry(TsExp.Literal("binding"), TsExp.String("form")));
         }
 
         var clientParams = new List<TsExp>()
