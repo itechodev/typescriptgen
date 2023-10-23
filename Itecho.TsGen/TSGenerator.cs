@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using Itecho.TsGen.TSExpressions;
 using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Http.Features;
@@ -206,25 +207,43 @@ public static class TsGenerator
                 return TsExp.Array(Array.Empty<TsExp>());
             case TsBuildInType tsBuildInType:
                 return TsExp.Literal("new File([\"\"], \"empty.txt\", { type: \"text/plain\" });");
-            // case TsIntersection tsIntersection:
-            //     break;
-            // case TsTuple tsTuple:
-            //     break;
-            // case TsUnion tsUnion:
-            //     break;
-            // case TsCompositeType tsCompositeType:
-            //     break;
-            // case TsDictionary tsDictionary:
-            //     return TsExp.Dictionary(new DictionaryEntry[]
-            //     {
-            //         new DictionaryEntry()
-            //     });
-            // case TsEnum tsEnum:
-            //     break;
-            // case TsGeneric tsGeneric:
-            //     break;
-            // case TsGenericReference tsGenericReference:
-            //     break;
+            case TsIntersection tsIntersection:
+                // only if all intersection type are interfaces
+                var entries = tsIntersection.Types.OfType<TsInterface>()
+                    .Select(t => new DictionaryEntry(TsExp.Spread(TsExp.FunctionCall(TsExp.Literal("create" + t.Name), null))));
+                return TsExp.Dictionary(entries);
+            case TsTuple tsTuple:
+                return TsExp.Array(tsTuple.Types.Select(CreateType));
+            case TsUnion tsUnion:
+                var prims = tsUnion.Types
+                    .OfType<TsPrimitive>()
+                    .Select(p => p.Type)
+                    .ToList();
+
+                if (prims.Contains(TsPrimitive.TsPrimitiveType.Null))
+                {
+                    return TsExp.Literal("null");
+                }
+                if (prims.Exists(t => t == TsPrimitive.TsPrimitiveType.Any || t == TsPrimitive.TsPrimitiveType.Undefined || t == TsPrimitive.TsPrimitiveType.Unknown))
+                {
+                    return TsExp.Literal("undefined");
+                }
+                // otherwise take the first one
+                return CreateType(tsUnion.Types.First());
+                break;
+            case TsDictionary tsDictionary:
+                if (tsDictionary.Key is TsEnum @enum)
+                {
+                    // generate keys for all @enums
+                    var members = @enum.Values.Keys.Select(k => new DictionaryEntry(TsExp.Literal(k), CreateType(tsDictionary.Value)));
+                    return TsExp.Dictionary(members);
+                }
+
+                return TsExp.Literal("{}");
+            case TsEnum tsEnum:
+                return TsExp.Literal(tsEnum.Values.Keys.First());
+            case TsGenericReference tsGenericReference:
+                return CreateType(tsGenericReference.ReferencedType);
             case TsInterface @interface:
                 return TsExp.FunctionCall(TsExp.Literal("create" + @interface.Name), null);
             case TsPrimitive tsPrimitive:
