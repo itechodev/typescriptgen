@@ -151,7 +151,8 @@ public static class TsConverter
         {
             var args = type.GetGenericArguments();
             if (args.Length != 1)
-                return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
+               return ConvertClass(type);
+                // return new TsPrimitive(TsPrimitive.TsPrimitiveType.Unknown);
 
             return new TsArray(Convert(args[0]));
         }
