@@ -38,11 +38,38 @@ public class ImportExp : TsExp
 
     public override void Write(TsCodeGenerator gen)
     {
-        gen.Write(FormatHelper.Spaces(
-            "import",
-            @Default?.Generate(),
-            Imports.Any() ? "{ " + string.Join(", ", Imports.Select(i => i.Generate())) + " }" : string.Empty,
-            $"from \"{Library}\";"
-        ));
+        var imports = "{ " + string.Join(", ", Imports.Select(i => i.Generate())) + " }";
+        
+        // type-only import can specify a default import or named bindings, but not both.
+        if (@Default?.IsTyped ?? false)
+        {
+            gen.Write(FormatHelper.Spaces(
+                "import",
+                @Default?.Generate(),
+                $"from \"{Library}\";"
+            ));
+            gen.NewLine();
+            
+            if (Imports.Any())
+            {
+                gen.Write(FormatHelper.Spaces(
+                    "import",
+                    imports,
+                    $"from \"{Library}\";"
+                ));
+                gen.NewLine();
+            }
+        }
+        else
+        {
+            gen.Write(FormatHelper.Spaces(
+                "import",
+                @Default?.Generate(),
+                Imports.Any() ? (@Default != null ? ", " : "") + imports : string.Empty,
+                $"from \"{Library}\";"
+            ));
+            gen.NewLine();
+        }
+        
     }
 }

@@ -25,6 +25,7 @@ public abstract class TsExp
 
     public static TsEmptyLineExp EmptyLine() => new();
     public static DictionaryExp Dictionary(IEnumerable<DictionaryEntry> entries) => new(entries);
+    public static ArrayExp Array(IEnumerable<TsExp> entries) => new(entries);
 
     public static FunctionDefExp FunctionDef(string name, TsType returnType, IEnumerable<TsParameter> parameters,
         TsBlockExp block) => new(name, returnType, parameters, block);

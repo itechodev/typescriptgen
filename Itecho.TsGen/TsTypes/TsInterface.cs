@@ -50,10 +50,11 @@ public class TsInterface : TsType
         Extends = extends;
         Generics = generics;
     }
-    public List<string> GetReferencedTypes()
+    public List<TsImportTypeResolverItem> GetReferencedTypes()
     {
         var resolver = new TsImportTypeResolver(this);
         resolver.Visit(this);
         return resolver.GetImports();
     }
+    
 }

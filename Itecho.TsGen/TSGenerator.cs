@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using Itecho.TsGen.TSExpressions;
 using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Http.Features;
@@ -25,13 +26,11 @@ public static class TsGenerator
         tsFile.Add(TsExp.Import("../request", null,
             new ImportExp.NamedImport("webRequest", false),
             new ImportExp.NamedImport("fileRequest", false)));
-        tsFile.Add(TsExp.EmptyLine());
 
         // import all references for this controller
         foreach (var import in controller.GetReferencedTypes())
         {
-            tsFile.Add(TsExp.Import($"../{TsGenArguments.InterfacesFolder}/{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
-            tsFile.Add(TsExp.EmptyLine());
+            tsFile.Add(TsExp.Import($"../{TsGenArguments.InterfacesFolder}/{FormatHelper.CamelCase(import.Name)}", new ImportExp.NamedImport(import.Name, true)));
         }
 
         tsFile.Add(TsExp.EmptyLine());
@@ -169,15 +168,119 @@ public static class TsGenerator
         // import all interfaces referenced by this interface
         foreach (var import in @interface.GetReferencedTypes())
         {
-            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import)}", new ImportExp.NamedImport(import, true)));
-            tsFile.Add(TsExp.EmptyLine());
+            var createImport = TsGenArguments.GenerateFactories && import.IsInterface  
+                ? new [] { new ImportExp.NamedImport("create" + import.Name, false) } 
+                : Array.Empty<ImportExp.NamedImport>();
+
+            tsFile.Add(TsExp.Import($"./{FormatHelper.CamelCase(import.Name)}",
+                new ImportExp.NamedImport(import.Name, import.IsInterface),
+                createImport
+            ));
         }
 
         tsFile.Add(TsExp.EmptyLine());
         tsFile.Add(TsExp.DefaultExport(TsExp.Interface(@interface)));
 
+        if (TsGenArguments.GenerateFactories)
+        {
+            tsFile.Add(TsExp.EmptyLine());
+            tsFile.Add(TsExp.NamedExport(TsExp.FunctionDef("create" + @interface.Name, @interface, ArraySegment<TsParameter>.Empty,
+                BuildFactoryMethod(@interface)
+            )));
+        }
+
         tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.InterfacesFolder, FormatHelper.CamelCase(@interface.Name)));
     }
+
+    private static TsBlockExp BuildFactoryMethod(TsInterface @interface)
+    {
+        var entries = new List<DictionaryEntry>();
+        // handle inheritance using spreads
+        foreach (var extend in @interface.Extends)
+        {
+            entries.Add(new DictionaryEntry(TsExp.Spread(TsExp.FunctionCall(TsExp.Literal("create" + extend.Name), null))));
+        }
+
+        entries.AddRange(@interface.Members.Select(member => new DictionaryEntry(
+            TsExp.Literal(FormatHelper.CamelCase(member.Name)), CreateType(member.Type)))
+        );
+
+        return TsExp.Block(
+            TsExp.Return(
+                TsExp.Dictionary(entries)
+            )
+        );
+    }
+    private static TsExp CreateType(TsType type)
+    {
+        switch (type)
+        {
+            case TsArray tsArray:
+                return TsExp.Array(Array.Empty<TsExp>());
+            case TsBuildInType tsBuildInType:
+                return TsExp.Literal("new File([\"\"], \"empty.txt\", { type: \"text/plain\" });");
+            case TsIntersection tsIntersection:
+                // only if all intersection type are interfaces
+                var entries = tsIntersection.Types.OfType<TsInterface>()
+                    .Select(t => new DictionaryEntry(TsExp.Spread(TsExp.FunctionCall(TsExp.Literal("create" + t.Name), null))));
+                return TsExp.Dictionary(entries);
+            case TsTuple tsTuple:
+                return TsExp.Array(tsTuple.Types.Select(CreateType));
+            case TsUnion tsUnion:
+                var prims = tsUnion.Types
+                    .OfType<TsPrimitive>()
+                    .Select(p => p.Type)
+                    .ToList();
+
+                if (prims.Contains(TsPrimitive.TsPrimitiveType.Null))
+                {
+                    return TsExp.Literal("null");
+                }
+                if (prims.Exists(t => t == TsPrimitive.TsPrimitiveType.Any || t == TsPrimitive.TsPrimitiveType.Undefined || t == TsPrimitive.TsPrimitiveType.Unknown))
+                {
+                    return TsExp.Literal("undefined");
+                }
+                // otherwise take the first one
+                return CreateType(tsUnion.Types.First());
+                break;
+            case TsDictionary tsDictionary:
+                if (tsDictionary.Key is TsEnum @enum)
+                {
+                    // generate keys for all @enums
+                    var members = @enum.Values.Keys.Select(k => new DictionaryEntry(TsExp.Literal(k), CreateType(tsDictionary.Value)));
+                    return TsExp.Dictionary(members);
+                }
+
+                return TsExp.Literal("{}");
+            case TsEnum tsEnum:
+                return TsExp.ObjectAccess(TsExp.Literal(tsEnum.Name), tsEnum.Values.Keys.First());
+            case TsGenericReference tsGenericReference:
+                return CreateType(tsGenericReference.ReferencedType);
+            case TsInterface @interface:
+                return TsExp.FunctionCall(TsExp.Literal("create" + @interface.Name), null);
+            case TsPrimitive tsPrimitive:
+                switch (tsPrimitive.Type)
+                {
+                    case TsPrimitive.TsPrimitiveType.Null:
+                        return TsExp.Literal("null");
+                    case TsPrimitive.TsPrimitiveType.String:
+                        return TsExp.String("");
+                    case TsPrimitive.TsPrimitiveType.Number:
+                        return TsExp.Literal("0");
+                    case TsPrimitive.TsPrimitiveType.Boolean:
+                        return TsExp.Literal("false");
+                    case TsPrimitive.TsPrimitiveType.Date:
+                        return TsExp.Literal("new Date()");
+                    case TsPrimitive.TsPrimitiveType.Undefined:
+                    case TsPrimitive.TsPrimitiveType.Unknown:
+                    case TsPrimitive.TsPrimitiveType.Any:
+                    default:
+                        return TsExp.Literal("undefined");
+                }
+        }
+        return TsExp.Literal("null!");
+    }
+
     public static void GenerateEnum(TsEnum @enum, string outputPath)
     {
         var tsFile = new TsFile();
