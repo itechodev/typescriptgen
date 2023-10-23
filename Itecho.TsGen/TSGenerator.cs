@@ -32,7 +32,6 @@ public static class TsGenerator
         foreach (var import in controller.GetReferencedTypes())
         {
             tsFile.Add(TsExp.Import($"../{TsGenArguments.InterfacesFolder}/{FormatHelper.CamelCase(import.Name)}", new ImportExp.NamedImport(import.Name, true)));
-            tsFile.Add(TsExp.EmptyLine());
         }
 
         tsFile.Add(TsExp.EmptyLine());
@@ -196,9 +195,16 @@ public static class TsGenerator
 
     private static TsBlockExp BuildFactoryMethod(TsInterface @interface)
     {
-        var entries = @interface.Members.Select(member => new DictionaryEntry(
-            TsExp.Literal(FormatHelper.CamelCase(member.Name)), CreateType(member.Type)));
-        
+        var entries = new List<DictionaryEntry>();
+        // handle inheritance using spreads
+        foreach (var extend in @interface.Extends)
+        {
+            entries.Add(new DictionaryEntry(TsExp.Spread(TsExp.FunctionCall(TsExp.Literal("create" + extend.Name), null))));
+        }
+
+        entries.AddRange(@interface.Members.Select(member => new DictionaryEntry(
+            TsExp.Literal(FormatHelper.CamelCase(member.Name)), CreateType(member.Type)))
+        );
 
         return TsExp.Block(
             TsExp.Return(
