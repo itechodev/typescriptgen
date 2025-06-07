@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="8.0.0"></a>
+## [8.0.0](https://www.github.com/itechodev/typescriptgen/releases/tag/v8.0.0) (2025-6-7)
+
 <a name="1.0.11"></a>
 ## [1.0.11](https://www.github.com/itechodev/typescriptgen/releases/tag/v1.0.11) (2023-8-1)
 
