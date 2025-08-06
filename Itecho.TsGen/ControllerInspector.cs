@@ -7,6 +7,7 @@ namespace Itecho.TsGen;
 public class ControllerInfo
 {
     public string Name { get; set; } = string.Empty;
+    public string Area { get; set; } = string.Empty;
     public string RouteTemplate { get; set; } = string.Empty;
     public List<ActionInfo> Actions { get; set; } = new();
 
@@ -165,6 +166,7 @@ public static class ControllerInspector
     {
         // multiple routes may exists, take the first one
         var route = controller.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
+        var area = controller.GetCustomAttributes<AreaAttribute>().FirstOrDefault();
 
         var actions = controller
             .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly |
@@ -184,6 +186,7 @@ public static class ControllerInspector
         return new ControllerInfo()
         {
             Name = controller.Name, 
+            Area = area?.RouteValue ?? string.Empty,
             RouteTemplate = route?.Template ?? string.Empty, 
             Actions = actions
                 .ToList()

@@ -39,16 +39,19 @@ public static class RouteHelper
         };
     }
 
-
-    private static string RoutePlaceHolders(string route, string controller, string action)
+    
+    
+    private static string RoutePlaceHolders(string route, string area, string controller, string action)
     {
         // replace common conventional placeholders
         // attribute routing, you define placeholders by using {...} syntax instead of square brackets.
         route = route.Replace("[controller]", controller);
         route = route.Replace("[action]", action);
+        route = route.Replace("[area]", area);
 
         route = route.Replace("{controller}", controller);
         route = route.Replace("{action}", action);
+        route = route.Replace("{area}", area);
 
         return route;
     }
@@ -58,21 +61,22 @@ public static class RouteHelper
         if (!string.IsNullOrEmpty(action.RouteTemplate))
         {
             if (action.RouteTemplate.StartsWith("/"))
-                return RoutePlaceHolders(action.RouteTemplate, FormatControllerName(controller.Name), action.Name);
+                return RoutePlaceHolders(action.RouteTemplate, controller.Area, FormatControllerName(controller.Name), action.Name);
 
             // when using route attributes on both the controller and actions, the routes is combined
-            return RoutePlaceHolders(controller.RouteTemplate + action.RouteTemplate, FormatControllerName(controller.Name), action.Name);
+            return RoutePlaceHolders(controller.RouteTemplate + action.RouteTemplate, controller.Area, FormatControllerName(controller.Name), action.Name);
         }
 
         if (!string.IsNullOrEmpty(controller.RouteTemplate))
         {
-            return RoutePlaceHolders(controller.RouteTemplate, FormatControllerName(controller.Name), action.Name);
+            return RoutePlaceHolders(controller.RouteTemplate, controller.Area, FormatControllerName(controller.Name), action.Name);
         }
         
         // fallback to the default route controller/action
-        return RoutePlaceHolders(TsGenArguments.DefaultPattern, FormatControllerName(controller.Name), action.Name);
+        return RoutePlaceHolders(TsGenArguments.DefaultPattern, controller.Area, FormatControllerName(controller.Name), action.Name);
     }
 
+    
     private static readonly Regex Extract = new(@"\{.*\}");
 
     // Takes in a route with segments, FarmController/{id}
