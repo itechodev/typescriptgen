@@ -3,10 +3,11 @@
   "isRoot": true,
   "tools": {
     "versionize": {
-      "version": "1.18.0",
+      "version": "1.27.0",
       "commands": [
         "versionize"
-      ]
+      ],
+      "rollForward": false
     }
   }
 }
