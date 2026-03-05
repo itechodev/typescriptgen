@@ -79,10 +79,34 @@ dotnet versionize
 
 # Publish
 
-Github draft new release:
-https://github.com/itechodev/typescriptgen/releases/new
+After running `dotnet versionize`, the version is bumped, CHANGELOG.md is updated, and a git tag is created.
 
-Choose tag, give title and description and publish.
+## Step 1: Push changes and tags
 
+```bash
+git push --follow-tags origin main
+```
 
+## Step 2: Create a GitHub Release
+
+The GitHub Actions workflow triggers on release creation (not tag push). Create a release using one of these methods:
+
+**Option A: GitHub CLI**
+```bash
+gh release create v8.0.3 --generate-notes
+```
+
+**Option B: GitHub Web UI**
+1. Go to https://github.com/itechodev/typescriptgen/releases/new
+2. Select the tag (e.g., `v8.0.3`)
+3. Add a title and description
+4. Click "Publish release"
+
+## What happens next
+
+The GitHub Actions workflow (`.github/workflows/release.yml`) will:
+1. Build the project in Release mode
+2. Run tests
+3. Pack the NuGet package
+4. Push to GitHub NuGet registry at `https://nuget.pkg.github.com/itechodev/index.json`
 
