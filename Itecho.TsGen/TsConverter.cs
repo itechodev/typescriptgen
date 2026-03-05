@@ -26,19 +26,22 @@ public static class TsConverter
     // nullable flag is used to indicate nullability of the type
     // is being dig out in the class definition and the type alone cannot be used alone
     // using a combination of the property type, declaring type and runtime generated attributes
-    public static TsType Convert(Type type, bool nullable = false)
+    public static TsType Convert(Type type, bool nullable = false, NullabilityInfo? nullabilityInfo = null)
     {
         if (Cache.TryGetValue(type, out var convert))
-            return HandleNullable(convert, type, nullable);
+            return HandleNullable(convert, type, nullable, nullabilityInfo);
 
         var converted = ConvertType(type);
-        return HandleNullable(SetCache(type, converted), type, nullable);
+        return HandleNullable(SetCache(type, converted), type, nullable, nullabilityInfo);
     }
 
     // nullables are not always stored with the type
     // therefore we cannot cache the type alone
-    private static TsType HandleNullable(TsType ret, Type type, bool nullable = false)
+    private static TsType HandleNullable(TsType ret, Type type, bool nullable = false, NullabilityInfo? nullabilityInfo = null)
     {
+        // Nullable reference types (string?[]) are erased at runtime, so typeof(string?[]) == typeof(string[]).
+        // only distinguishable when observed through a member’s metadata using NullabilityInfoContext; not from Type alone.
+        
         if (!nullable && !type.IsNullable()) return ret;
         // union already contains null
         // by Nullable<T> generic check
@@ -52,7 +55,7 @@ public static class TsConverter
         return new TsUnion(t.ToArray());
     }
 
-    private static TsType ConvertType(Type type)
+    private static TsType ConvertType(Type type, NullabilityInfo? nullabilityInfo = null)
     {
         if (type.IsGenericParameter)
         {
@@ -109,8 +112,31 @@ public static class TsConverter
         // the underlying type for all enums are numeric
         // var values = Enum.GetValues(type).Cast<int>();
         var options = names.ToDictionary(t => t, t => System.Convert.ToInt32(Enum.Parse(type, t)));
-        // for now all enums are strings
-        return new TsEnum(type.Name, TsGenArguments.EnumValueType, options);
+
+        // Extract descriptions from Description attribute on each enum field
+        var descriptions = new Dictionary<string, string>();
+        foreach (var name in names)
+        {
+            var field = type.GetField(name);
+            if (field == null) continue;
+
+            var descAttr = field.GetCustomAttributesData()
+                .SingleOrDefault(a => a.AttributeType.Name == "DescriptionAttribute");
+
+            if (descAttr?.ConstructorArguments.Count > 0)
+            {
+                var description = descAttr.ConstructorArguments[0].Value?.ToString();
+                if (!string.IsNullOrEmpty(description))
+                {
+                    descriptions[name] = description;
+                }
+            }
+        }
+
+        // Only include descriptions if at least one enum value has a description
+        var finalDescriptions = descriptions.Count > 0 ? descriptions : null;
+
+        return new TsEnum(type.Name, TsGenArguments.EnumValueType, options, finalDescriptions);
     }
 
     private static TsType ConvertNonPrimitive(Type type)
@@ -275,6 +301,8 @@ public static class TsConverter
             extends.Add(Convert(type.BaseType));
         }
 
+        var nullabilityContext = new NullabilityInfoContext();
+        
         var members = type
             .GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance)
             // filter out index properties
@@ -282,7 +310,8 @@ public static class TsConverter
             .Select(p =>
             {
                 var name = GetCustomPropertyName(p) ?? p.Name;
-                return new TsInterface.TsInterfaceMember(name, Convert(p.PropertyType, NullableHelper.IsNullable(p)));
+                var nullabilityInfo = nullabilityContext.Create(p);
+                return new TsInterface.TsInterfaceMember(name, Convert(p.PropertyType, NullableHelper.IsNullable(p), nullabilityInfo));
             })
             .ToArray();
 

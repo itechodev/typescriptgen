@@ -49,5 +49,6 @@ public abstract class TsExp
     public static LiteralExp Literal(string value) => new(value);
     public static ObjectAccessExp ObjectAccess(TsExp exp, string member) => new(exp, member);
     public static EnumExp Enum(TsEnum @enum) => new(@enum);
+    public static EnumDescriptionExp EnumDescription(TsEnum @enum) => new(@enum);
     public static SpreadExp Spread(TsExp exp) => new(exp);
 }

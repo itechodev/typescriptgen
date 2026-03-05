@@ -12,12 +12,12 @@ namespace Itecho.TsGen;
 public static class NullableHelper
 {
     
-    public static bool IsNullable(PropertyInfo property) =>
-        IsNullableHelper(property.PropertyType, property.DeclaringType, property.CustomAttributes);
-
-    public static bool IsNullable(FieldInfo field) =>
-        IsNullableHelper(field.FieldType, field.DeclaringType, field.CustomAttributes);
-
+    public static bool IsNullable(PropertyInfo property) 
+    {
+        var ctx = new NullabilityInfoContext();
+        return IsNullableHelper(property.PropertyType, property.DeclaringType, property.CustomAttributes) || ctx.Create(property).ElementType?.ReadState == NullabilityState.Nullable;
+    } 
+    
     public static bool IsNullable(ParameterInfo parameter) =>
         IsNullableHelper(parameter.ParameterType, parameter.Member, parameter.CustomAttributes);
 

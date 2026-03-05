@@ -288,6 +288,13 @@ public static class TsGenerator
         tsFile.Add(TsExp.EmptyLine());
         tsFile.Add(TsExp.Enum(@enum));
         tsFile.Add(TsExp.EmptyLine());
+
+        if (@enum.HasDescriptions)
+        {
+            tsFile.Add(TsExp.NamedExport(TsExp.EnumDescription(@enum)));
+            tsFile.Add(TsExp.EmptyLine());
+        }
+
         tsFile.Add(TsExp.DefaultExport(TsExp.Literal(@enum.Name)));
         tsFile.WriteToFile(Path.Combine(outputPath, TsGenArguments.InterfacesFolder, FormatHelper.CamelCase(@enum.Name)));
     }
