@@ -15,7 +15,7 @@ public static class NullableHelper
     public static bool IsNullable(PropertyInfo property) 
     {
         var ctx = new NullabilityInfoContext();
-        return IsNullableHelper(property.PropertyType, property.DeclaringType, property.CustomAttributes) || ctx.Create(property).ElementType?.ReadState == NullabilityState.Nullable;
+        return IsNullableHelper(property.PropertyType, property.DeclaringType, property.CustomAttributes) || ctx.Create(property).ReadState == NullabilityState.Nullable;
     } 
     
     public static bool IsNullable(ParameterInfo parameter) =>
