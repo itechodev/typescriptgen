@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="8.0.4"></a>
+## [8.0.4](https://www.github.com/itechodev/typescriptgen/releases/tag/v8.0.4) (2026-03-24)
+
+### Bug Fixes
+
+* array generic nullable fix ([e4ab20f](https://www.github.com/itechodev/typescriptgen/commit/e4ab20f))
+
 <a name="8.0.3"></a>
 ## [8.0.3](https://www.github.com/itechodev/typescriptgen/releases/tag/v8.0.3) (2026-03-05)
 
