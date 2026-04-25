@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="10.0.0"></a>
+## [10.0.0](https://www.github.com/itechodev/typescriptgen/releases/tag/v10.0.0) (2026-04-25)
+
+### Features
+
+* upgrade to .NET 10
+
+### Breaking Changes
+
+* requires .NET 10 runtime
+
 <a name="8.0.4"></a>
 ## [8.0.4](https://www.github.com/itechodev/typescriptgen/releases/tag/v8.0.4) (2026-03-24)
 
