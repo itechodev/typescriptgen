@@ -63,21 +63,48 @@ public static class RouteHelper
             if (action.RouteTemplate.StartsWith("/"))
                 return RoutePlaceHolders(action.RouteTemplate, controller.Area, FormatControllerName(controller.Name), action.Name);
 
-            // when using route attributes on both the controller and actions, the routes is combined
-            return RoutePlaceHolders(controller.RouteTemplate + action.RouteTemplate, controller.Area, FormatControllerName(controller.Name), action.Name);
+            // when using route attributes on both the controller and actions, the routes is combined.
+            // ASP.NET joins with a single '/' regardless of trailing/leading slashes on either side.
+            return RoutePlaceHolders(JoinRoutes(controller.RouteTemplate, action.RouteTemplate), controller.Area, FormatControllerName(controller.Name), action.Name);
         }
 
         if (!string.IsNullOrEmpty(controller.RouteTemplate))
         {
             return RoutePlaceHolders(controller.RouteTemplate, controller.Area, FormatControllerName(controller.Name), action.Name);
         }
-        
+
         // fallback to the default route controller/action
         return RoutePlaceHolders(TsGenArguments.DefaultPattern, controller.Area, FormatControllerName(controller.Name), action.Name);
     }
 
+    private static string JoinRoutes(string controllerRoute, string actionRoute)
+    {
+        if (string.IsNullOrEmpty(controllerRoute)) return actionRoute;
+        if (string.IsNullOrEmpty(actionRoute)) return controllerRoute;
+        var c = controllerRoute.TrimEnd('/');
+        var a = actionRoute.TrimStart('/');
+        return c + "/" + a;
+    }
+
     
-    private static readonly Regex Extract = new(@"\{.*\}");
+    // Matches any {...} segment in a route template. Non-greedy so two
+    // adjacent placeholders (`{a}/{b}`) are picked up as separate matches.
+    private static readonly Regex Extract = new(@"\{[^}]+\}");
+
+    /// <summary>
+    /// Extracts the bare parameter names from a route template, stripping
+    /// the braces and any route constraint (e.g. ":guid", "?", "=default").
+    /// </summary>
+    public static IReadOnlyList<string> ExtractRouteParameterNames(string routeTemplate)
+    {
+        var names = new List<string>();
+        foreach (Match m in Extract.Matches(routeTemplate))
+        {
+            var inner = m.Value.Trim('{', '}');
+            names.Add(StripRouteConstraint(inner));
+        }
+        return names;
+    }
 
     // Takes in a route with segments, FarmController/{id}
     // And converts to a JS interpolated string
@@ -108,17 +135,42 @@ public static class RouteHelper
 
         var segments = new List<InterpolatedSegment>();
         var prev = 0;
+        var routeIndex = 0;
         foreach (Match match in matches)
         {
             if (match.Index > prev)
             {
-                segments.Add(InterpolatedStringExp.String(url.Substring(prev, match.Index)));
+                segments.Add(InterpolatedStringExp.String(url.Substring(prev, match.Index - prev)));
             }
 
-            segments.Add(InterpolatedStringExp.Expression(TsExp.Literal(url.Substring(match.Index, match.Length))));
+            // Use the parameter name from the action signature rather than the
+            // raw `{id:guid}` from the route template — strips ASP.NET route
+            // constraints and matches the actual TS parameter the caller passes in.
+            var paramName = routeIndex < routes.Length
+                ? routes[routeIndex].Name
+                : StripRouteConstraint(url.Substring(match.Index + 1, match.Length - 2));
+            segments.Add(InterpolatedStringExp.Expression(TsExp.Literal(paramName)));
             prev = match.Index + match.Length;
+            routeIndex++;
+        }
+
+        if (prev < url.Length)
+        {
+            segments.Add(InterpolatedStringExp.String(url.Substring(prev)));
         }
 
         return TsExp.InterpolatedString(segments.ToArray());
+    }
+
+    // {id:guid} -> id, {name?} -> name, {id=5} -> id
+    private static string StripRouteConstraint(string segment)
+    {
+        var colon = segment.IndexOf(':');
+        if (colon >= 0) segment = segment.Substring(0, colon);
+        var question = segment.IndexOf('?');
+        if (question >= 0) segment = segment.Substring(0, question);
+        var equals = segment.IndexOf('=');
+        if (equals >= 0) segment = segment.Substring(0, equals);
+        return segment;
     }
 }

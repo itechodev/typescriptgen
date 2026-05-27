@@ -56,3 +56,30 @@ public class HomeController : Controller
         return Ok(Priority.Medium);
     }
 }
+
+// RESTful attribute-routed sample, exercising the 10.1.0 features:
+// - controller + action route templates combined
+// - Guid mapped to string
+// - implicit route binding via {id} matching the parameter name
+// - CancellationToken filtered out
+// - route constraints (:guid) stripped from the interpolated URL
+[ApiController]
+[Route("api/v1/orders")]
+public class OrdersController : ControllerBase
+{
+    public record OrderDto(Guid Id, string Reference);
+    public record CreateOrderRequest(string Reference);
+
+    [HttpGet]
+    public ActionResult<OrderDto[]> List(CancellationToken ct) => Ok(Array.Empty<OrderDto>());
+
+    [HttpGet("{id:guid}")]
+    public ActionResult<OrderDto> Get(Guid id, CancellationToken ct) => Ok(new OrderDto(id, "REF-1"));
+
+    [HttpPost]
+    public ActionResult<OrderDto> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
+        => Ok(new OrderDto(Guid.NewGuid(), request.Reference));
+
+    [HttpPut("{id:guid}/assign")]
+    public ActionResult<bool> Assign(Guid id, [FromBody] CreateOrderRequest request, CancellationToken ct) => Ok(true);
+}

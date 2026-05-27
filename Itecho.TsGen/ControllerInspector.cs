@@ -1,6 +1,7 @@
 using System.Reflection;
 using Itecho.TsGen.TsTypes;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Itecho.TsGen;
 
@@ -90,6 +91,9 @@ public static class ControllerInspector
 
     private static ActionParameterKind GetKind(ParameterInfo param)
     {
+        if (param.GetCustomAttribute<FromRouteAttribute>() != null)
+            return ActionParameterKind.Route;
+
         if (param.GetCustomAttribute<FromBodyAttribute>() != null)
             return ActionParameterKind.Body;
 
@@ -112,6 +116,12 @@ public static class ControllerInspector
     {
         // Ignore service attribute. They are automatically injected by the framework
         if (param.GetCustomAttribute<FromServicesAttribute>() != null)
+            return null;
+
+        // CancellationToken is a server-side concern (ASP.NET binds it
+        // automatically from the request lifetime). It should never appear
+        // in the generated client signature.
+        if (param.ParameterType == typeof(CancellationToken))
             return null;
 
         return new ActionParameter(
@@ -146,18 +156,46 @@ public static class ControllerInspector
         // take the first one
         var route = methodInfo.GetCustomAttributes<RouteAttribute>().FirstOrDefault();
 
+        // RESTful attribute-routed actions usually carry the route segment on
+        // the HTTP verb attribute itself: [HttpGet("{id:guid}/transporter-invoice")]
+        // rather than on a separate [Route]. Read that as a fallback.
+        var verbTemplate = methodInfo.GetCustomAttributes<HttpMethodAttribute>()
+            .FirstOrDefault(a => !string.IsNullOrEmpty(a.Template))?.Template;
+
+        var routeTemplate = route?.Template ?? verbTemplate ?? "";
+
+        var parameters = methodInfo
+            .GetParameters()
+            .Select(PopulateParameter)
+            .Where(p => p != null)
+            .Cast<ActionParameter>()
+            .ToList();
+
+        // Implicit route binding: ASP.NET treats a parameter whose name
+        // matches a {placeholder} in the route template as a route value
+        // even without [FromRoute]. Reclassify those so URLs interpolate
+        // correctly instead of dumping the id into the query string.
+        if (!string.IsNullOrEmpty(routeTemplate))
+        {
+            var placeholders = RouteHelper.ExtractRouteParameterNames(routeTemplate);
+            foreach (var p in parameters)
+            {
+                if (p.Kind == ActionParameterKind.Query &&
+                    placeholders.Contains(p.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    p.Kind = ActionParameterKind.Route;
+                }
+            }
+        }
+
         return new ActionInfo()
         {
             Name = methodInfo.Name,
-            RouteTemplate = route?.Template ?? "",
+            RouteTemplate = routeTemplate,
             ReturnType = returnType,
             ReturnTypeClr = methodInfo.ReturnType,
-            Kind = PopulateMethodKind(methodInfo), Parameters = methodInfo
-                .GetParameters()
-                .Select(PopulateParameter)
-                .Where(p => p != null)
-                .Cast<ActionParameter>()
-                .ToList()
+            Kind = PopulateMethodKind(methodInfo),
+            Parameters = parameters
         };
     }
 

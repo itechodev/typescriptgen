@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="10.1.0"></a>
+## [10.1.0](https://www.github.com/itechodev/typescriptgen/releases/tag/v10.1.0) (2026-05-27)
+
+### Features
+
+* RESTful attribute-routed controllers are now supported. The tool reads route templates from HTTP verb attributes (`[HttpGet("{id:guid}")]`, `[HttpPost("login")]`, etc.) in addition to `[Route]`, joins them correctly with the controller-level route, and renders parameter placeholders as TS template interpolations (`/api/v1/orders/${id}`).
+* Implicit route parameter binding: a method parameter whose name matches a `{placeholder}` in the route template is now classified as a route param even without an explicit `[FromRoute]` attribute (matches ASP.NET binding behaviour).
+* `Guid` parameters and properties now map to TS `string` instead of falling through to `unknown`.
+* `CancellationToken` parameters are filtered out — they were leaking into generated client signatures as query parameters.
+* Route constraints (`:guid`, `:int`), optional markers (`?`), and default values (`=foo`) are stripped from interpolated URL placeholders so the generated TS uses the bare parameter name.
+* Multi-target: the package now ships both `net8.0` and `net10.0` tool builds, with `RollForward=Major` so newer minor or major framework patches also work.
+
+### Bug Fixes
+
+* The route placeholder regex is now non-greedy (`\{[^}]+\}`), correctly handling routes with multiple adjacent placeholders like `{a}/{b}`.
+* Fixed an off-by-one in URL substring extraction when a route template has more than one placeholder.
+* Tail segment of a URL after the last `{...}` is no longer dropped.
+
+### Compatibility
+
+* Existing convention-routed controllers (return concrete DTOs, no `[Route]`/`[HttpVerb]` templates) continue to work exactly as in 10.0.0 — the new behaviour is purely additive.
+
 <a name="10.0.0"></a>
 ## [10.0.0](https://www.github.com/itechodev/typescriptgen/releases/tag/v10.0.0) (2026-04-25)
 

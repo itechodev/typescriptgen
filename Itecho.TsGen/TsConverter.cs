@@ -74,6 +74,14 @@ public static class TsConverter
             return new TsVoid();
         }
 
+        // Guid serialises to a string over the wire; the C# Type.GetTypeCode
+        // returns Object for it which would otherwise fall through to
+        // ConvertNonPrimitive and surface as `unknown` in the generated TS.
+        if (type == typeof(Guid))
+        {
+            return new TsPrimitive(TsPrimitive.TsPrimitiveType.String);
+        }
+
         switch (Type.GetTypeCode(type))
         {
             case TypeCode.Object:
