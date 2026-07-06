@@ -16,6 +16,22 @@
         <ToolCommandName>itecho.tsgen</ToolCommandName>
         <PackageOutputPath>./nupkg</PackageOutputPath>
         <Version>10.1.0</Version>
+
+        <!-- Public package metadata (nuget.org) -->
+        <PackageId>Itecho.TsGen</PackageId>
+        <Authors>Itecho</Authors>
+        <Description>CLI tool that generates TypeScript clients and models from compiled ASP.NET Core controllers.</Description>
+        <PackageTags>typescript;codegen;aspnetcore;dotnet-tool;openapi-alternative</PackageTags>
+        <RepositoryUrl>https://github.com/itechodev/typescriptgen</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
+        <!-- SPDX license expression. Change if MIT is not your intended license. -->
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReleaseNotes>10.1.0 — RESTful attribute-routed controllers: read HTTP verb templates ([HttpGet("...")]), implicit route parameter binding ({id} → ${id} in TS), strip route constraints (:guid, ?, =default), map Guid → string, filter CancellationToken parameters. Multi-target net8.0 + net10.0.</PackageReleaseNotes>
     </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Readme.md lives at the repo root, one level above this project. -->
+        <None Include="../Readme.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 </Project>
